@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import api from '../services/api';
 
 const AuthContext = createContext(null);
 
@@ -13,8 +14,16 @@ export const AuthProvider = ({ children }) => {
 
     if (savedToken && savedUser) {
       try {
-        setUser(JSON.parse(savedUser));
+        const parsed = JSON.parse(savedUser);
+        setUser(parsed);
         setToken(savedToken);
+
+        api.getMe().then(res => {
+          if (res.success && res.user) {
+            setUser(res.user);
+            localStorage.setItem('user', JSON.stringify(res.user));
+          }
+        }).catch(() => {});
       } catch {
         localStorage.removeItem('user');
         localStorage.removeItem('token');
@@ -23,10 +32,10 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
-  const login = (token, userData) => {
-    localStorage.setItem('token', token);
+  const login = (tkn, userData) => {
+    localStorage.setItem('token', tkn);
     localStorage.setItem('user', JSON.stringify(userData));
-    setToken(token);
+    setToken(tkn);
     setUser(userData);
   };
 
@@ -37,10 +46,20 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
+  const refreshUser = async () => {
+    try {
+      const res = await api.getMe();
+      if (res.success && res.user) {
+        setUser(res.user);
+        localStorage.setItem('user', JSON.stringify(res.user));
+      }
+    } catch {}
+  };
+
   const isLoggedIn = !!token && !!user;
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, logout, isLoggedIn }}>
+    <AuthContext.Provider value={{ user, token, loading, login, logout, isLoggedIn, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );
