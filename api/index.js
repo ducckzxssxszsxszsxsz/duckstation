@@ -432,6 +432,19 @@ app.put('/api/bookings/:id/reschedule', protect, adminOnly, async (req, res) => 
   } catch (e) { res.status(500).json({ success: false, message: e.message }); }
 });
 
+// --- ADMIN CLEANUP (reset all data except admin) ---
+app.post('/api/admin/cleanup', protect, adminOnly, async (req, res) => {
+  try {
+    await User.deleteMany({ role: { $ne: 'admin' } });
+    await Order.deleteMany({});
+    await Ticket.deleteMany({});
+    await Booking.deleteMany({});
+    await BlockedDate.deleteMany({});
+    await Broadcast.deleteMany({});
+    res.json({ success: true, message: 'All data cleared except admin' });
+  } catch (e) { res.status(500).json({ success: false, message: e.message }); }
+});
+
 // ─── HEALTH ───
 app.get('/api/health', (_, res) => res.json({ status: 'ok', timestamp: new Date() }));
 
