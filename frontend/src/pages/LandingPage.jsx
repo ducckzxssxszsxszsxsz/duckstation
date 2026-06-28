@@ -6,29 +6,35 @@ import { useNavigate } from 'react-router-dom';
 // ─── D3 NETWORK GRAPH ───
 const MarketNetworkGraph = () => {
   const svgRef = useRef();
+  const containerRef = useRef();
 
   useEffect(() => {
-    if (!svgRef.current) return;
+    if (!svgRef.current || !containerRef.current) return;
     d3.select(svgRef.current).selectAll("*").remove();
 
-    const width = svgRef.current.clientWidth || 800;
-    const height = svgRef.current.clientHeight || 600;
+    const container = containerRef.current;
+    const width = Math.min(container.clientWidth || 800, 800);
+    const height = Math.min(container.clientHeight || 600, 600);
 
     const svg = d3.select(svgRef.current)
       .attr('width', '100%')
       .attr('height', '100%')
-      .attr('viewBox', `0 0 ${width} ${height}`);
+      .attr('viewBox', `0 0 ${width} ${height}`)
+      .attr('preserveAspectRatio', 'xMidYMid meet');
+
+    const isSmall = width < 500;
+    const scale = isSmall ? 0.6 : 1;
 
     const nodesData = [
-      { id: "Hub", group: 0, radius: 40, label: "MARKET", type: "hub" },
-      { id: "BTC", group: 1, radius: 25, label: "BTC/USDT", type: "asset", change: "+2.4%", status: "up" },
-      { id: "ETH", group: 1, radius: 20, label: "ETH/USDT", type: "asset", change: "+1.1%", status: "up" },
-      { id: "SOL", group: 1, radius: 18, label: "SOL/USDT", type: "asset", change: "-0.5%", status: "down" },
-      { id: "XAU", group: 2, radius: 28, label: "XAU/USD", type: "asset", change: "+0.8%", status: "up" },
-      { id: "EUR", group: 2, radius: 20, label: "EUR/USD", type: "asset", change: "-0.2%", status: "down" },
-      { id: "GBP", group: 2, radius: 20, label: "GBP/JPY", type: "asset", change: "+0.4%", status: "up" },
-      { id: "NDX", group: 3, radius: 25, label: "NASDAQ", type: "asset", change: "+1.5%", status: "up" },
-      { id: "SPX", group: 3, radius: 22, label: "S&P 500", type: "asset", change: "+0.9%", status: "up" },
+      { id: "Hub", group: 0, radius: 40 * scale, label: "MARKET", type: "hub" },
+      { id: "BTC", group: 1, radius: 25 * scale, label: "BTC/USDT", type: "asset", change: "+2.4%", status: "up" },
+      { id: "ETH", group: 1, radius: 20 * scale, label: "ETH/USDT", type: "asset", change: "+1.1%", status: "up" },
+      { id: "SOL", group: 1, radius: 18 * scale, label: "SOL/USDT", type: "asset", change: "-0.5%", status: "down" },
+      { id: "XAU", group: 2, radius: 28 * scale, label: "XAU/USD", type: "asset", change: "+0.8%", status: "up" },
+      { id: "EUR", group: 2, radius: 20 * scale, label: "EUR/USD", type: "asset", change: "-0.2%", status: "down" },
+      { id: "GBP", group: 2, radius: 20 * scale, label: "GBP/JPY", type: "asset", change: "+0.4%", status: "up" },
+      { id: "NDX", group: 3, radius: 25 * scale, label: "NASDAQ", type: "asset", change: "+1.5%", status: "up" },
+      { id: "SPX", group: 3, radius: 22 * scale, label: "S&P 500", type: "asset", change: "+0.9%", status: "up" },
     ];
 
     const linksData = [
@@ -46,8 +52,8 @@ const MarketNetworkGraph = () => {
     ];
 
     const simulation = d3.forceSimulation(nodesData)
-      .force("link", d3.forceLink(linksData).id(d => d.id).distance(120))
-      .force("charge", d3.forceManyBody().strength(-300))
+      .force("link", d3.forceLink(linksData).id(d => d.id).distance(120 * scale))
+      .force("charge", d3.forceManyBody().strength(-300 * scale))
       .force("center", d3.forceCenter(width / 2, height / 2))
       .force("collide", d3.forceCollide().radius(d => d.radius + 15));
 
@@ -70,13 +76,13 @@ const MarketNetworkGraph = () => {
     nodeGroup.append("text").text(d => d.label)
       .attr("x", 0).attr("y", d => d.type === "hub" ? 0 : -d.radius - 8)
       .attr("text-anchor", "middle").attr("dominant-baseline", "middle")
-      .attr("fill", "#FFF").attr("font-size", d => d.type === "hub" ? "14px" : "12px").attr("font-weight", "bold");
+      .attr("fill", "#FFF").attr("font-size", d => d.type === "hub" ? `${14 * scale}px` : `${12 * scale}px`).attr("font-weight", "bold");
 
     assetNodes.append("text").text(d => d.change)
-      .attr("x", 0).attr("y", d => d.radius + 12)
+      .attr("x", 0).attr("y", d => d.radius + 12 * scale)
       .attr("text-anchor", "middle")
       .attr("fill", d => d.status === 'up' ? "#4ade80" : "#f87171")
-      .attr("font-size", "10px").attr("font-weight", "bold");
+      .attr("font-size", `${10 * scale}px`).attr("font-weight", "bold");
 
     simulation.on("tick", () => {
       link.attr("x1", d => d.source.x).attr("y1", d => d.source.y)
@@ -97,7 +103,9 @@ const MarketNetworkGraph = () => {
   return (
     <>
       <style>{`.pulse-hub { animation: hubPulse 2s infinite alternate; } @keyframes hubPulse { 0% { filter: drop-shadow(0 0 10px rgba(255,215,0,0.5)); transform: scale(1); } 100% { filter: drop-shadow(0 0 30px rgba(255,215,0,0.8)); transform: scale(1.05); } }`}</style>
-      <svg ref={svgRef} className="w-full h-full opacity-80"></svg>
+      <div ref={containerRef} className="w-full h-full overflow-hidden" style={{ maxHeight: '100%' }}>
+        <svg ref={svgRef} className="w-full h-full opacity-80"></svg>
+      </div>
     </>
   );
 };
@@ -136,14 +144,14 @@ const LandingPage = () => {
     <div className="bg-brand-dark overflow-hidden">
       {/* ── HERO ── */}
       <section className="relative min-h-[calc(100vh-73px)] flex flex-col">
-        <div className="absolute inset-0 z-0 opacity-40 lg:opacity-100 pointer-events-none lg:pointer-events-auto flex justify-end items-center">
-          <div className="w-full lg:w-[60%] h-[80vh] mr-[-5%] mt-[-5%]">
+        <div className="hidden md:flex absolute inset-0 z-0 opacity-60 pointer-events-none justify-end items-center">
+          <div className="w-[55%] h-[80vh] mr-[2%]">
             <MarketNetworkGraph />
           </div>
         </div>
 
         <div className="container mx-auto px-4 relative z-10 flex-grow flex items-center pt-10 pb-20">
-          <div className="max-w-2xl">
+          <div className="max-w-2xl w-full">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-primary/10 border border-brand-primary/20 text-brand-primary text-sm font-semibold mb-8 backdrop-blur-sm shadow-[0_0_15px_rgba(255,215,0,0.15)]">
               <span className="relative flex h-3 w-3">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
@@ -177,6 +185,11 @@ const LandingPage = () => {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Mobile graph below hero text */}
+        <div className="md:hidden w-full h-[300px] px-4 pb-8 pointer-events-none overflow-hidden">
+          <MarketNetworkGraph />
         </div>
       </section>
 

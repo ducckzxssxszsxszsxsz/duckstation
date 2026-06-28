@@ -55,6 +55,18 @@ const protect = async (req, res, next) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.user = await User.findById(decoded.id).select('-password');
     if (!req.user) return res.status(401).json({ success: false, message: 'User not found' });
+    // Auto-revert expired roles
+    try {
+      if (req.user.role !== 'guest' && req.user.role !== 'admin' && req.user.roleExpiry) {
+        if (new Date() > new Date(req.user.roleExpiry)) {
+          req.user.role = 'guest';
+          req.user.roleExpiry = null;
+          req.user.roleGrantedAt = null;
+          await req.user.save();
+          res.setHeader('X-Role-Changed', 'guest');
+        }
+      }
+    } catch (e) {}
     next();
   } catch { return res.status(401).json({ success: false, message: 'Invalid token' }); }
 };
@@ -181,6 +193,39 @@ app.put('/api/users/profile', protect, async (req, res) => {
   } catch (e) { res.status(500).json({ success: false, message: e.message }); }
 });
 
+// --- ADMIN: SET USER ROLE ---
+app.put('/api/users/:id/role', protect, adminOnly, async (req, res) => {
+  try {
+    const { role, durationDays } = req.body;
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+    user.role = role;
+    if (role === 'guest') {
+      user.roleExpiry = null;
+      user.roleGrantedAt = null;
+    } else {
+      user.roleGrantedAt = new Date();
+      user.roleExpiry = new Date(Date.now() + (durationDays || 30) * 24 * 60 * 60 * 1000);
+    }
+    await user.save();
+    res.json({ success: true, user: { id: user._id, name: user.name, role: user.role, roleExpiry: user.roleExpiry } });
+  } catch (e) { res.status(500).json({ success: false, message: e.message }); }
+});
+
+// --- ADMIN: EXTEND USER ROLE ---
+app.put('/api/users/:id/extend', protect, adminOnly, async (req, res) => {
+  try {
+    const { days } = req.body;
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+    const base = user.roleExpiry && new Date(user.roleExpiry) > new Date() ? new Date(user.roleExpiry) : new Date();
+    user.roleExpiry = new Date(base.getTime() + (days || 7) * 24 * 60 * 60 * 1000);
+    if (!user.roleGrantedAt) user.roleGrantedAt = new Date();
+    await user.save();
+    res.json({ success: true, user: { id: user._id, name: user.name, role: user.role, roleExpiry: user.roleExpiry } });
+  } catch (e) { res.status(500).json({ success: false, message: e.message }); }
+});
+
 // ─── BATCHES ───
 app.get('/api/batches', async (req, res) => {
   try { res.json({ success: true, batches: await Batch.find().sort('-createdAt') }); } catch (e) { res.status(500).json({ success: false, message: e.message }); }
@@ -229,7 +274,12 @@ app.put('/api/orders/:id/approve', protect, adminOnly, async (req, res) => {
       user.status = 'active';
       if (order.batch) {
         const batch = await Batch.findById(order.batch);
-        if (batch && batch.role) user.role = batch.role;
+        if (batch && batch.role) {
+          user.role = batch.role;
+          user.roleGrantedAt = new Date();
+          const duration = batch.durationDays || 30;
+          user.roleExpiry = new Date(Date.now() + duration * 24 * 60 * 60 * 1000);
+        }
         user.discordRole = order.batch.discordRole;
       }
       await user.save();

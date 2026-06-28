@@ -191,6 +191,43 @@ const UserSettings = () => {
       </div>
 
       <div className="space-y-6">
+        {/* Subscription Info */}
+        {user?.role !== 'guest' && user?.role !== 'admin' && (
+          <div className="bg-brand-secondary border border-white/10 rounded-2xl p-4 sm:p-6">
+            <h3 className="text-lg sm:text-xl font-bold mb-4">Status Subscription</h3>
+            <div className="flex items-center gap-3 p-4 bg-brand-dark border border-white/5 rounded-xl">
+              <div className={`p-2 rounded-lg ${user?.roleExpiry && new Date(user.roleExpiry) < new Date() ? 'bg-red-500/10 text-red-400' : 'bg-green-500/10 text-green-400'}`}>
+                <Crown size={20} />
+              </div>
+              <div>
+                <p className="font-bold text-sm">Role: {user?.role}</p>
+                {user?.roleExpiry ? (
+                  new Date(user.roleExpiry) < new Date()
+                    ? <p className="text-xs text-red-400">Expired</p>
+                    : <p className="text-xs text-green-400">Berakhir: {new Date(user.roleExpiry).toLocaleDateString('id-ID')} — Sisa {Math.max(0, Math.ceil((new Date(user.roleExpiry) - new Date()) / (1000*60*60*24)))} hari</p>
+                ) : (
+                  <p className="text-xs text-gray-400">Tanpa batas waktu</p>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {user?.role === 'guest' && (
+          <div className="bg-brand-secondary border border-white/10 rounded-2xl p-4 sm:p-6">
+            <div className="flex items-center gap-3 p-4 bg-brand-dark border border-white/5 rounded-xl">
+              <AlertTriangle size={20} className="text-yellow-400 shrink-0" />
+              <div className="flex-grow">
+                <p className="font-bold text-sm text-yellow-300">Belum subscribe</p>
+                <p className="text-xs text-gray-400">Pilih batch untuk membuka akses materi dan fitur premium.</p>
+              </div>
+              <button onClick={() => window.location.href = '/dashboard/batches'}
+                className="px-4 py-2 bg-brand-primary text-brand-dark font-bold rounded-xl text-xs hover:bg-yellow-400 transition-colors shrink-0">
+                Pilih Kelas
+              </button>
+            </div>
+          </div>
+        )}
         {/* Profil Dasar */}
         <div className="bg-brand-secondary border border-white/10 rounded-2xl p-4 sm:p-6">
           <h3 className="text-lg sm:text-xl font-bold mb-4">Profil & Kontak</h3>
@@ -309,7 +346,15 @@ const Dashboard = () => {
               </div>
               <div>
                 <p className="font-medium text-sm truncate max-w-[90px]">{user?.name || 'Guest User'}</p>
-                <p className="text-[10px] text-gray-500 font-semibold">{user?.role || 'User'}</p>
+                {user?.role === 'guest' ? (
+                  <p className="text-[10px] text-gray-500 font-semibold">Guest — Belum subscribe</p>
+                ) : user?.roleExpiry ? (
+                  new Date(user.roleExpiry) < new Date()
+                    ? <p className="text-[10px] text-red-400 font-semibold">Role: {user.role} — Expired</p>
+                    : <p className="text-[10px] text-green-400 font-semibold">Sisa {Math.max(0, Math.ceil((new Date(user.roleExpiry) - new Date()) / (1000*60*60*24)))} hari</p>
+                ) : (
+                  <p className="text-[10px] text-gray-500 font-semibold">{user?.role || 'User'}</p>
+                )}
               </div>
             </div>
             <button onClick={logout} className="text-gray-500 group-hover:text-red-400 transition-colors" title="Logout">

@@ -9,7 +9,7 @@ const AdminBatches = () => {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({
-    name: '', tier: 'Starter', priceIdr: '', priceUsdt: '', discordRole: '', roleName: '', status: 'open',
+    name: '', tier: 'Starter', priceIdr: '', priceUsdt: '', discordRole: '', roleName: '', status: 'open', durationDays: 30,
   });
 
   const fetchBatches = async () => {
@@ -39,7 +39,7 @@ const AdminBatches = () => {
       if (res.success) {
         fetchBatches();
         setShowForm(false);
-        setForm({ name: '', tier: 'Starter', priceIdr: '', priceUsdt: '', discordRole: '', roleName: '', status: 'open' });
+        setForm({ name: '', tier: 'Starter', priceIdr: '', priceUsdt: '', discordRole: '', roleName: '', status: 'open', durationDays: 30 });
       }
     } catch (err) {
       console.error('Failed to create batch:', err);
@@ -105,6 +105,12 @@ const AdminBatches = () => {
                 <option value="closed">Closed</option>
               </select>
             </div>
+            <div>
+              <label className="text-xs text-gray-400 mb-1 block">Durasi Subscription (hari)</label>
+              <input type="number" value={form.durationDays} onChange={e => setForm({...form, durationDays: parseInt(e.target.value) || 30})}
+                placeholder="30" min="1"
+                className="w-full bg-brand-dark border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-primary/50" />
+            </div>
           </div>
           <div className="flex gap-3">
             <button onClick={handleCreate} className="px-5 py-2 bg-brand-primary text-brand-dark font-bold rounded-xl text-sm hover:bg-yellow-400 transition-colors">Simpan Batch</button>
@@ -139,6 +145,8 @@ const AdminBatches = () => {
                     {batch.roleName && <span>Role: <span className="text-green-400 font-medium">{batch.roleName}</span></span>}
                     {batch.roleName && <span>•</span>}
                     <span>Discord Role: <span className="text-purple-400 font-medium">@{batch.discordRole || 'n/a'}</span></span>
+                    <span>•</span>
+                    <span>Durasi: <span className="text-brand-primary font-medium">{batch.durationDays || 30} hari</span></span>
                   </div>
                 </div>
               </div>

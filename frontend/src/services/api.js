@@ -131,6 +131,12 @@ const api = {
 
   closeTicket: (id) =>
     fetch(`${API_URL}/tickets/${id}/close`, { method: 'PUT', headers: headers() }).then(r => r.json()),
+
+  setUserRole: (userId, role, durationDays) =>
+    fetch(`${API_URL}/users/${userId}/role`, { method: 'PUT', headers: headers(), body: JSON.stringify({ role, durationDays }) }).then(r => r.json()),
+
+  extendUserRole: (userId, days) =>
+    fetch(`${API_URL}/users/${userId}/extend`, { method: 'PUT', headers: headers(), body: JSON.stringify({ days }) }).then(r => r.json()),
 };
 
 export default api;

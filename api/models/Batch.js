@@ -11,6 +11,7 @@ const batchSchema = new mongoose.Schema({
   status:      { type: String, enum: ['open', 'closed'], default: 'open' },
   features:    [{ type: String }],
   members:     { type: Number, default: 0 },
+  durationDays: { type: Number, default: 30 },
 }, { timestamps: true });
 
 module.exports = mongoose.model('Batch', batchSchema);

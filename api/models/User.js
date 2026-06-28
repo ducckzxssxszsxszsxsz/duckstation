@@ -6,6 +6,8 @@ const userSchema = new mongoose.Schema({
   password:     { type: String, select: false },
   avatar:       { type: String, default: '' },
   role:         { type: String, enum: ['guest', 'user', 'admin'], default: 'guest' },
+  roleExpiry:    { type: Date, default: null },
+  roleGrantedAt: { type: Date, default: null },
   status:       { type: String, enum: ['active', 'inactive', 'banned'], default: 'active' },
 
   // Auth provider

@@ -1,11 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Star, Eye, CheckSquare, AlertTriangle, ExternalLink } from 'lucide-react';
+import { Search, Star, Eye, CheckSquare, AlertTriangle, ExternalLink, Crown, ChevronDown, Plus } from 'lucide-react';
 import api from '../../services/api';
 
 const AdminUsers = () => {
   const [users, setUsers] = useState([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
+  const [editingRole, setEditingRole] = useState(null);
+  const [newRole, setNewRole] = useState('');
+  const [durationDays, setDurationDays] = useState(30);
+  const [extendDays, setExtendDays] = useState(7);
+  const [extendingUser, setExtendingUser] = useState(null);
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -22,6 +27,31 @@ const AdminUsers = () => {
     const debounce = setTimeout(fetchUsers, 300);
     return () => clearTimeout(debounce);
   }, [search]);
+
+  const handleSetRole = async (userId) => {
+    try {
+      const res = await api.setUserRole(userId, newRole, durationDays);
+      if (res.success) {
+        setUsers(prev => prev.map(u => u._id === userId ? { ...u, role: newRole, roleExpiry: res.user.roleExpiry } : u));
+        setEditingRole(null);
+        setNewRole('');
+      }
+    } catch (err) {
+      console.error('Failed to set role:', err);
+    }
+  };
+
+  const handleExtend = async (userId) => {
+    try {
+      const res = await api.extendUserRole(userId, extendDays);
+      if (res.success) {
+        setUsers(prev => prev.map(u => u._id === userId ? { ...u, roleExpiry: res.user.roleExpiry } : u));
+        setExtendingUser(null);
+      }
+    } catch (err) {
+      console.error('Failed to extend role:', err);
+    }
+  };
 
   return (
     <div className="p-6 md:p-8 max-w-7xl mx-auto">
@@ -47,6 +77,7 @@ const AdminUsers = () => {
                   <th className="text-left px-5 py-4">Member</th>
                   <th className="text-left px-5 py-4">Batch</th>
                   <th className="text-left px-5 py-4">Discord</th>
+                  <th className="text-left px-5 py-4">Role</th>
                   <th className="text-left px-5 py-4">Progres</th>
                   <th className="text-left px-5 py-4">Quiz Score</th>
                   <th className="text-left px-5 py-4">Status</th>
@@ -65,6 +96,44 @@ const AdminUsers = () => {
                     </td>
                     <td className="px-5 py-4 text-gray-300 text-xs">{u.batchName || '-'}</td>
                     <td className="px-5 py-4 text-gray-400 text-xs">{u.discordTag || '-'}</td>
+                    <td className="px-5 py-4">
+                      {editingRole === u._id ? (
+                        <div className="flex flex-col gap-1">
+                          <select value={newRole} onChange={e => setNewRole(e.target.value)}
+                            className="bg-brand-dark border border-white/10 rounded-lg px-2 py-1 text-xs text-white focus:outline-none focus:border-brand-primary/50">
+                            <option value="guest">Guest</option>
+                            <option value="user">Member</option>
+                            <option value="admin">Admin</option>
+                          </select>
+                          {newRole === 'user' && (
+                            <input type="number" value={durationDays} onChange={e => setDurationDays(parseInt(e.target.value) || 30)}
+                              placeholder="Hari" min="1"
+                              className="bg-brand-dark border border-white/10 rounded-lg px-2 py-1 text-xs text-white focus:outline-none focus:border-brand-primary/50 w-20" />
+                          )}
+                          <div className="flex gap-1">
+                            <button onClick={() => handleSetRole(u._id)} className="px-2 py-0.5 bg-green-500/20 text-green-400 rounded text-[10px] font-bold">OK</button>
+                            <button onClick={() => setEditingRole(null)} className="px-2 py-0.5 bg-white/5 text-gray-400 rounded text-[10px]">Batal</button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col gap-1">
+                          <span className={`px-2 py-0.5 rounded-lg text-[10px] font-bold border ${
+                            u.role === 'admin' ? 'bg-purple-500/20 text-purple-400 border-purple-500/30' :
+                            u.role === 'user' ? 'bg-blue-500/20 text-blue-400 border-blue-500/30' :
+                            'bg-gray-500/20 text-gray-400 border-gray-500/30'
+                          }`}>
+                            {u.role === 'admin' ? 'Admin' : u.role === 'user' ? 'Member' : 'Guest'}
+                          </span>
+                          {u.roleExpiry && (
+                            <span className={`text-[10px] ${new Date(u.roleExpiry) < new Date() ? 'text-red-400' : 'text-green-400'}`}>
+                              {new Date(u.roleExpiry) < new Date() ? 'Expired' : `Sisa ${Math.max(0, Math.ceil((new Date(u.roleExpiry) - new Date()) / (1000*60*60*24)))}h`}
+                            </span>
+                          )}
+                          <button onClick={() => { setEditingRole(u._id); setNewRole(u.role); }}
+                            className="text-[10px] text-brand-primary hover:underline text-left">Ubah Role</button>
+                        </div>
+                      )}
+                    </td>
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-2">
                         <div className="w-20 bg-brand-dark rounded-full h-1.5 overflow-hidden">
@@ -88,9 +157,22 @@ const AdminUsers = () => {
                       </span>
                     </td>
                     <td className="px-5 py-4">
-                      <button className="flex items-center gap-1 px-3 py-1.5 bg-white/5 text-gray-300 hover:text-white hover:bg-white/10 rounded-lg text-xs font-medium border border-white/10 transition-colors">
-                        <Eye size={12} /> Detail
-                      </button>
+                      <div className="flex gap-1">
+                        {extendingUser === u._id ? (
+                          <div className="flex items-center gap-1">
+                            <input type="number" value={extendDays} onChange={e => setExtendDays(parseInt(e.target.value) || 7)}
+                              placeholder="Hari" min="1"
+                              className="w-16 bg-brand-dark border border-white/10 rounded-lg px-2 py-1 text-xs text-white focus:outline-none focus:border-brand-primary/50" />
+                            <button onClick={() => handleExtend(u._id)} className="px-2 py-1 bg-green-500/20 text-green-400 rounded-lg text-[10px] font-bold">OK</button>
+                            <button onClick={() => setExtendingUser(null)} className="px-2 py-1 bg-white/5 text-gray-400 rounded-lg text-[10px]">X</button>
+                          </div>
+                        ) : (
+                          <button onClick={() => setExtendingUser(u._id)}
+                            className="flex items-center gap-1 px-3 py-1.5 bg-white/5 text-gray-300 hover:text-white hover:bg-white/10 rounded-lg text-xs font-medium border border-white/10 transition-colors">
+                            <Plus size={12} /> Extend
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
