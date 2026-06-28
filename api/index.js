@@ -433,7 +433,7 @@ app.put('/api/bookings/:id/reschedule', protect, adminOnly, async (req, res) => 
 });
 
 // --- ADMIN CLEANUP (reset all data except admin) ---
-app.post('/api/admin/cleanup', protect, adminOnly, async (req, res) => {
+app.get('/api/admin/cleanup', protect, adminOnly, async (req, res) => {
   try {
     await User.deleteMany({ role: { $ne: 'admin' } });
     await Order.deleteMany({});
