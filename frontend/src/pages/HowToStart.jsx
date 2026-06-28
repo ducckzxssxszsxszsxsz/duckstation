@@ -1,39 +1,77 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, CheckCircle, Clock, Play, CheckSquare, Calendar, AlertTriangle, RotateCcw, MessageSquare, Shield, BookOpen } from 'lucide-react';
+import { CheckCircle, Clock, Play, CheckSquare, Calendar, AlertTriangle, RotateCcw, MessageSquare, BookOpen } from 'lucide-react';
+import api from '../services/api';
 
 const HowToStart = () => {
   const navigate = useNavigate();
-  const [userStatus] = useState({
-    isApproved: false,
-    quizAttempts: 1,
-    maxAttempts: 3,
-    quizScore: 45,
-    quizMinScore: 70,
-    quizPassed: false,
-  });
+  const [userStatus, setUserStatus] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    api.getMyAttempts().then(res => {
+      if (res.success) {
+        setUserStatus({
+          quizAttempts: res.attempts?.length || 0,
+          maxAttempts: res.maxAttempts || 3,
+          quizScore: res.lastScore || 0,
+          quizMinScore: res.minScore || 70,
+          quizPassed: res.passed || false,
+        });
+      } else {
+        setUserStatus({
+          quizAttempts: 0,
+          maxAttempts: 3,
+          quizScore: 0,
+          quizMinScore: 70,
+          quizPassed: false,
+        });
+      }
+    }).catch(() => {
+      setUserStatus({
+        quizAttempts: 0,
+        maxAttempts: 3,
+        quizScore: 0,
+        quizMinScore: 70,
+        quizPassed: false,
+      });
+    }).finally(() => setLoading(false));
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="p-6 md:p-8 max-w-4xl mx-auto">
+        <div className="mb-8">
+          <h2 className="text-3xl font-black mb-2">Cara Memulai 🦆</h2>
+          <p className="text-gray-400">Memuat data...</p>
+        </div>
+        <div className="flex items-center justify-center py-20">
+          <div className="w-8 h-8 border-2 border-brand-primary border-t-transparent rounded-full animate-spin"></div>
+        </div>
+      </div>
+    );
+  }
 
   const isQuizBlocked = userStatus.quizAttempts >= userStatus.maxAttempts && !userStatus.quizPassed;
 
   return (
     <div className="p-6 md:p-8 max-w-4xl mx-auto">
-      {/* Header */}
       <div className="mb-8">
         <h2 className="text-3xl font-black mb-2">Cara Memulai 🦆</h2>
         <p className="text-gray-400">Ikuti setiap langkah di bawah secara berurutan untuk memulai perjalanan trading kamu.</p>
       </div>
 
-      {/* ── STEP TIMELINE ── */}
+      {/* STEP TIMELINE */}
       <div className="bg-gradient-to-br from-brand-secondary to-[#1A1A24] border border-white/10 rounded-2xl p-6 md:p-8 mb-8 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-64 h-64 bg-brand-primary/5 rounded-full blur-[80px] pointer-events-none"></div>
         <div className="relative z-10">
           <div className="space-y-0">
             {[
-              { id: 1, label: 'Daftar & Bayar',    desc: 'Isi form pendaftaran & lakukan pembayaran via QRIS atau Transfer.',     done: true, icon: '💳' },
-              { id: 2, label: 'Menunggu Admin',    desc: 'Admin verifikasi pembayaran & approve pendaftaran kamu.',              done: false, active: true, icon: '⏳' },
-              { id: 3, label: 'Kerjakan Quiz',     desc: 'Quiz wajib sebelum akses materi. Min. skor 70, maks 3x percobaan.',   done: false, icon: '📝' },
-              { id: 4, label: 'Mulai Belajar',     desc: 'Akses modul materi berjenjang & kerjakan tugas.',                     done: false, icon: '📚' },
-              { id: 5, label: 'Booking Mentor',    desc: 'Jadwalkan sesi 1-on-1 dengan mentor untuk review quiz & materi.',     done: false, icon: '🎯' },
+              { id: 1, label: 'Daftar & Bayar', desc: 'Isi form pendaftaran & lakukan pembayaran via QRIS atau Transfer.', done: true, icon: '💳' },
+              { id: 2, label: 'Menunggu Admin', desc: 'Admin verifikasi pembayaran & approve pendaftaran kamu.', done: false, active: true, icon: '⏳' },
+              { id: 3, label: 'Kerjakan Quiz', desc: 'Quiz wajib sebelum akses materi. Min. skor 70, maks 3x percobaan.', done: userStatus.quizPassed, icon: '📝' },
+              { id: 4, label: 'Mulai Belajar', desc: 'Akses modul materi berjenjang & kerjakan tugas.', done: false, icon: '📚' },
+              { id: 5, label: 'Booking Mentor', desc: 'Jadwalkan sesi 1-on-1 dengan mentor untuk review quiz & materi.', done: false, icon: '🎯' },
             ].map((step, i, arr) => (
               <div key={step.id} className="flex items-start gap-4 relative">
                 {i < arr.length - 1 && <div className={`absolute left-[19px] top-[40px] w-px h-[calc(100%-24px)] ${step.done ? 'bg-brand-primary' : 'bg-white/10'}`}></div>}
@@ -66,7 +104,7 @@ const HowToStart = () => {
         </div>
       </div>
 
-      {/* ── QUIZ BOX ── */}
+      {/* QUIZ BOX */}
       <div className={`border rounded-2xl overflow-hidden mb-8 transition-all ${userStatus.quizPassed ? 'bg-green-500/5 border-green-500/20' : isQuizBlocked ? 'bg-red-500/5 border-red-500/20' : 'bg-brand-secondary border-white/10'}`}>
         <div className="p-6">
           <div className="flex items-center justify-between mb-4">
@@ -94,8 +132,8 @@ const HowToStart = () => {
           {!userStatus.quizPassed && (
             <>
               <div className="flex gap-2 mb-4">
-                {[1,2,3].map(a => (
-                  <div key={a} className={`flex-1 h-2 rounded-full ${a <= userStatus.quizAttempts ? (isQuizBlocked ? 'bg-red-500' : 'bg-yellow-500') : 'bg-white/10'}`}></div>
+                {Array.from({ length: userStatus.maxAttempts }, (_, i) => (
+                  <div key={i} className={`flex-1 h-2 rounded-full ${i < userStatus.quizAttempts ? (isQuizBlocked ? 'bg-red-500' : 'bg-yellow-500') : 'bg-white/10'}`}></div>
                 ))}
               </div>
 
@@ -175,7 +213,7 @@ const HowToStart = () => {
         </div>
       </div>
 
-      {/* ── STATUS GRID ── */}
+      {/* STATUS GRID */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <button onClick={() => navigate('/dashboard/homework')}
           className="bg-brand-secondary border border-white/10 rounded-xl p-4 text-left hover:border-brand-primary/30 transition-all group">

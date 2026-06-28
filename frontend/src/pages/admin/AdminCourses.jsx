@@ -1,79 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Plus, Edit, Trash2, ChevronDown, ChevronUp, FileText, Image, GripVertical, Upload, X, Eye, EyeOff, CheckCircle, MoveUp, MoveDown } from 'lucide-react';
-
-const initialModules = [
-  {
-    id: 1,
-    title: 'Modul 1: Fundamental Market & Candlestick',
-    batch: 'Semua Batch',
-    status: 'published',
-    free: true,
-    lessons: [
-      {
-        id: 1, title: 'Apa itu Forex & Crypto?', status: 'published',
-        steps: [
-          { id: 1, type: 'text', content: 'Forex (Foreign Exchange) adalah pasar keuangan terbesar di dunia dengan volume transaksi harian mencapai $6.6 triliun. Pasar ini beroperasi 24 jam sehari, 5 hari seminggu, memperdagangkan pasangan mata uang seperti EUR/USD, GBP/JPY, dan lainnya.' },
-          { id: 2, type: 'image', content: '', description: 'Diagram alur cara kerja pasar Forex — Broker bertindak sebagai perantara antara retail trader dan interbank market. Harga ditentukan oleh supply dan demand global.' },
-          { id: 3, type: 'text', content: 'Crypto (Cryptocurrency) adalah aset digital yang berjalan di atas teknologi blockchain. Berbeda dengan Forex, Crypto beroperasi 24/7 dan tidak dikontrol oleh otoritas pusat. Contoh aset utama: Bitcoin (BTC), Ethereum (ETH), dan Solana (SOL).' },
-          { id: 4, type: 'image', content: '', description: 'Perbandingan Market Cap: Crypto vs Forex. Meskipun crypto tumbuh pesat, Forex masih menjadi pasar terbesar di dunia dari sisi volume.' },
-          { id: 5, type: 'text', content: 'Sebagai trader, kamu tidak perlu memiliki aset secara fisik. Kamu hanya berspekulasi terhadap pergerakan harga — baik naik (Buy/Long) maupun turun (Sell/Short). Ini yang disebut dengan CFD (Contract for Difference).' },
-        ]
-      },
-      {
-        id: 2, title: 'Membaca Candlestick Dasar', status: 'published',
-        steps: [
-          { id: 1, type: 'text', content: 'Candlestick adalah metode visual untuk menampilkan pergerakan harga. Setiap candle menunjukkan 4 informasi utama: Open (harga buka), High (tertinggi), Low (terendah), dan Close (harga tutup).' },
-          { id: 2, type: 'image', content: '', description: 'Anatomi satu candlestick — Badan (body) menunjukkan rentang Open ke Close. Garis tipis di atas/bawah (wick/shadow) menunjukkan High dan Low.' },
-          { id: 3, type: 'text', content: 'Bullish Candle (Hijau): Close > Open — harga naik periode ini. Bearish Candle (Merah): Close < Open — harga turun periode ini. Semakin besar body, semakin kuat momentum.' },
-          { id: 4, type: 'image', content: '', description: 'Perbandingan Bullish vs Bearish candle. Perhatikan perbedaan ukuran body dan panjang wick yang mengindikasikan kekuatan buyer vs seller.' },
-          { id: 5, type: 'text', content: 'Doji: Candle dengan body sangat kecil — menunjukkan keraguan pasar. Hammer: Body kecil di atas, wick panjang di bawah — potensi reversal bullish. Shooting Star: Kebalikan dari Hammer.' },
-          { id: 6, type: 'image', content: '', description: 'Katalog pola candlestick dasar: Doji, Hammer, Shooting Star, Engulfing, dan Morning Star. Simpan referensi ini untuk analisis chart nanti.' },
-        ]
-      },
-      {
-        id: 3, title: 'Tren dan Trendline', status: 'draft',
-        steps: [
-          { id: 1, type: 'text', content: 'Tren adalah arah pergerakan harga secara keseluruhan. Ada tiga jenis tren: Uptrend (Higher Highs & Higher Lows), Downtrend (Lower Highs & Lower Lows), dan Sideways (ranging).' },
-          { id: 2, type: 'image', content: '', description: 'Contoh Uptrend pada chart GBP/USD H4. Perhatikan pola Higher High (HH) dan Higher Low (HL) yang membentuk staircase naik.' },
-        ]
-      }
-    ]
-  },
-  {
-    id: 2,
-    title: 'Modul 2: Smart Money Concepts (SMC)',
-    batch: 'Batch 6 Pro',
-    status: 'published',
-    free: false,
-    lessons: [
-      {
-        id: 1, title: 'Order Block & Breaker Block', status: 'published',
-        steps: [
-          { id: 1, type: 'text', content: 'Order Block (OB) adalah area di mana institutional order (large volume) ditempatkan oleh bank dan institusi besar. OB biasanya terletak di sebelum pergerakan impulsif besar.' },
-          { id: 2, type: 'image', content: '', description: 'Contoh Bullish Order Block pada EUR/USD. Area berwarna kuning adalah zona terakhir sebelum harga bergerak naik tajam — inilah OB yang harus dicari.' },
-          { id: 3, type: 'text', content: 'Breaker Block adalah OB yang sudah di-break (ditembus). Fungsi OB sebagai support berubah menjadi resistance (atau sebaliknya). Ini adalah zona high-probability untuk entry.' },
-          { id: 4, type: 'image', content: '', description: 'Ilustrasi Bearish Breaker Block — Harga sebelumnya membuat OB bullish, tapi kemudian di-break. Zona OB lama sekarang menjadi resistance baru (breaker).' },
-        ]
-      },
-      {
-        id: 2, title: 'Fair Value Gap (FVG)', status: 'published',
-        steps: [
-          { id: 1, type: 'text', content: 'Fair Value Gap (FVG) adalah ketidakseimbangan harga (inefficiency) di mana harga bergerak terlalu cepat sehingga meninggalkan gap. FVG sering menjadi magnet harga untuk kembali mengisi gap.' },
-          { id: 2, type: 'image', content: '', description: 'Bullish FVG pada BTC/USDT — Tiga candle di mana low candle ketiga lebih tinggi dari high candle pertama. Area gap inilah FVG yang nantinya akan di-retest.' },
-          { id: 3, type: 'text', content: 'Ada 3 jenis FVG: Bullish FVG (gap ke atas), Bearish FVG (gap ke bawah), dan FVG yang sudah terisi (mitigated). FVG yang belum terisi memiliki probabilitas lebih tinggi untuk menjadi zona entry.' },
-        ]
-      }
-    ]
-  },
-  {
-    id: 3,
-    title: 'Modul 3: Risk Management & Trading Plan',
-    batch: 'Batch 6 Pro',
-    status: 'draft',
-    free: false,
-    lessons: []
-  },
-];
+import api from '../../services/api';
 
 // ─── STEP EDITOR ───
 const StepEditor = ({ step, index, total, onUpdate, onDelete, onMoveUp, onMoveDown }) => {
@@ -110,14 +37,13 @@ const StepEditor = ({ step, index, total, onUpdate, onDelete, onMoveUp, onMoveDo
               className="w-full bg-brand-dark border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-brand-primary/50 resize-none" />
           ) : (
             <>
-              {/* Upload area */}
               <div className="border-2 border-dashed border-white/10 rounded-xl p-6 text-center hover:border-purple-500/30 transition-colors cursor-pointer bg-brand-dark">
                 <Upload size={24} className="mx-auto mb-2 text-gray-500" />
                 <p className="text-xs text-gray-400">Klik atau drag & drop gambar ke sini</p>
                 <p className="text-[10px] text-gray-600 mt-1">JPG, PNG, WebP • Max 5MB</p>
               </div>
               <textarea rows={3} value={step.description} onChange={e => onUpdate({ ...step, description: e.target.value })}
-                placeholder="Deskripsi / penjelasan untuk gambar ini — jelaskan apa yang ditunjukkan pada gambar, poin-poin penting, dan konteks untuk siswa..."
+                placeholder="Deskripsi / penjelasan untuk gambar ini..."
                 className="w-full bg-brand-dark border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-brand-primary/50 resize-none" />
             </>
           )}
@@ -155,23 +81,17 @@ const LessonCard = ({ lesson, onUpdate, onDelete }) => {
   };
 
   const addStep = (type) => {
-    const newStep = {
-      id: Date.now(),
-      type,
-      content: type === 'text' ? '' : '',
-      description: type === 'image' ? '' : '',
-    };
+    const newStep = { id: Date.now(), type, content: '', description: '' };
     onUpdate({ ...lesson, steps: [...lesson.steps, newStep] });
   };
 
   return (
     <div className="bg-brand-secondary border border-white/5 rounded-2xl overflow-hidden">
-      {/* Lesson Header */}
       <div className="flex items-center justify-between px-4 py-3 cursor-pointer hover:bg-white/3"
         onClick={() => setExpanded(!expanded)}>
         <div className="flex items-center gap-3">
           <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-black ${lesson.status === 'published' ? 'bg-green-500/20 text-green-400' : 'bg-gray-500/20 text-gray-500'}`}>
-            {lesson.id}
+            {lesson.id || lesson._id}
           </div>
           <div>
             {editTitle ? (
@@ -183,7 +103,7 @@ const LessonCard = ({ lesson, onUpdate, onDelete }) => {
             ) : (
               <p className="font-bold text-sm" onDoubleClick={(e) => { e.stopPropagation(); setEditTitle(true); }}>{lesson.title}</p>
             )}
-            <p className="text-[10px] text-gray-500">{lesson.steps.length} langkah • {lesson.steps.filter(s => s.type === 'image').length} gambar • {lesson.steps.filter(s => s.type === 'text').length} teks</p>
+            <p className="text-[10px] text-gray-500">{lesson.steps?.length || 0} langkah • {(lesson.steps || []).filter(s => s.type === 'image').length} gambar • {(lesson.steps || []).filter(s => s.type === 'text').length} teks</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -192,15 +112,14 @@ const LessonCard = ({ lesson, onUpdate, onDelete }) => {
         </div>
       </div>
 
-      {/* Steps List */}
       {expanded && (
         <div className="border-t border-white/10 bg-brand-dark/40 p-4 space-y-2">
-          {lesson.steps.length === 0 ? (
+          {(!lesson.steps || lesson.steps.length === 0) ? (
             <p className="text-sm text-gray-500 text-center py-6">Belum ada konten. Tambahkan langkah di bawah.</p>
           ) : (
             lesson.steps.map((step, idx) => (
               <StepEditor
-                key={step.id}
+                key={step.id || idx}
                 step={step}
                 index={idx}
                 total={lesson.steps.length}
@@ -211,8 +130,6 @@ const LessonCard = ({ lesson, onUpdate, onDelete }) => {
               />
             ))
           )}
-
-          {/* Add Step Buttons */}
           <div className="flex gap-2 pt-2">
             <button onClick={() => addStep('text')}
               className="flex-1 py-2.5 border border-dashed border-green-500/30 text-green-400 hover:bg-green-500/10 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-2">
@@ -231,10 +148,33 @@ const LessonCard = ({ lesson, onUpdate, onDelete }) => {
 
 // ─── MAIN ───
 const AdminCourses = () => {
-  const [modules, setModules] = useState(initialModules);
-  const [expanded, setExpanded] = useState(1);
+  const [modules, setModules] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [expanded, setExpanded] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [newModule, setNewModule] = useState({ title: '', batch: 'Semua Batch', status: 'draft', free: false });
+
+  useEffect(() => {
+    const fetchModules = async () => {
+      try {
+        const res = await api.getAllModules();
+        if (res.success && res.modules) {
+          const mapped = res.modules.map(m => ({
+            ...m,
+            id: m._id,
+            lessons: (m.lessons || []).map(l => ({ ...l, id: l._id || l.id, steps: l.steps || [] })),
+          }));
+          setModules(mapped);
+          if (mapped.length > 0) setExpanded(mapped[0].id);
+        }
+      } catch (err) {
+        console.error('Failed to fetch modules:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchModules();
+  }, []);
 
   const updateModule = (modIdx, newData) => {
     const updated = [...modules];
@@ -334,50 +274,53 @@ const AdminCourses = () => {
 
       {/* Module List */}
       <div className="space-y-4">
-        {modules.map((mod, modIdx) => (
-          <div key={mod.id} className="bg-brand-secondary border border-white/10 rounded-2xl overflow-hidden">
-            {/* Module Header */}
-            <div className="flex items-center justify-between p-5 cursor-pointer hover:bg-white/3"
-              onClick={() => setExpanded(expanded === mod.id ? null : mod.id)}>
-              <div>
-                <div className="flex items-center gap-2 flex-wrap mb-1">
-                  <h3 className="font-bold">{mod.title}</h3>
-                  {mod.free && <span className="text-[10px] bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full font-bold border border-green-500/20">GRATIS</span>}
-                  <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold border ${mod.status === 'published' ? 'bg-blue-500/20 text-blue-400 border-blue-500/20' : 'bg-gray-500/20 text-gray-400 border-gray-500/20'}`}>
-                    {mod.status === 'published' ? 'Published' : 'Draft'}
-                  </span>
+        {loading ? (
+          <div className="p-10 text-center text-gray-500">Memuat modul...</div>
+        ) : modules.length === 0 ? (
+          <div className="p-10 text-center text-gray-500">Belum ada modul.</div>
+        ) : (
+          modules.map((mod, modIdx) => (
+            <div key={mod.id || mod._id} className="bg-brand-secondary border border-white/10 rounded-2xl overflow-hidden">
+              <div className="flex items-center justify-between p-5 cursor-pointer hover:bg-white/3"
+                onClick={() => setExpanded(expanded === mod.id ? null : mod.id)}>
+                <div>
+                  <div className="flex items-center gap-2 flex-wrap mb-1">
+                    <h3 className="font-bold">{mod.title}</h3>
+                    {mod.free && <span className="text-[10px] bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full font-bold border border-green-500/20">GRATIS</span>}
+                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold border ${mod.status === 'published' ? 'bg-blue-500/20 text-blue-400 border-blue-500/20' : 'bg-gray-500/20 text-gray-400 border-gray-500/20'}`}>
+                      {mod.status === 'published' ? 'Published' : 'Draft'}
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-500">Akses: {mod.batch} • {mod.lessons?.length || 0} lessons</p>
                 </div>
-                <p className="text-xs text-gray-500">Akses: {mod.batch} • {mod.lessons.length} lessons</p>
+                <div className="flex items-center gap-2">
+                  {expanded === mod.id ? <ChevronUp size={18} className="text-gray-400" /> : <ChevronDown size={18} className="text-gray-400" />}
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                {expanded === mod.id ? <ChevronUp size={18} className="text-gray-400" /> : <ChevronDown size={18} className="text-gray-400" />}
-              </div>
+
+              {expanded === mod.id && (
+                <div className="border-t border-white/10 bg-brand-dark/50 p-4 space-y-3">
+                  {(!mod.lessons || mod.lessons.length === 0) ? (
+                    <p className="text-sm text-gray-500 text-center py-4">Belum ada lesson. Klik tombol di bawah.</p>
+                  ) : (
+                    mod.lessons.map((lesson, lessonIdx) => (
+                      <LessonCard
+                        key={lesson.id || lessonIdx}
+                        lesson={lesson}
+                        onUpdate={(d) => updateLesson(modIdx, lessonIdx, d)}
+                        onDelete={() => deleteLesson(modIdx, lessonIdx)}
+                      />
+                    ))
+                  )}
+                  <button onClick={() => addLesson(modIdx)}
+                    className="w-full py-2.5 border border-dashed border-white/20 text-gray-400 hover:text-white hover:border-white/40 rounded-xl text-sm font-bold transition-colors flex items-center justify-center gap-2">
+                    <Plus size={14} /> Tambah Lesson
+                  </button>
+                </div>
+              )}
             </div>
-
-            {/* Lessons */}
-            {expanded === mod.id && (
-              <div className="border-t border-white/10 bg-brand-dark/50 p-4 space-y-3">
-                {mod.lessons.length === 0 ? (
-                  <p className="text-sm text-gray-500 text-center py-4">Belum ada lesson. Klik tombol di bawah.</p>
-                ) : (
-                  mod.lessons.map((lesson, lessonIdx) => (
-                    <LessonCard
-                      key={lesson.id}
-                      lesson={lesson}
-                      onUpdate={(d) => updateLesson(modIdx, lessonIdx, d)}
-                      onDelete={() => deleteLesson(modIdx, lessonIdx)}
-                    />
-                  ))
-                )}
-
-                <button onClick={() => addLesson(modIdx)}
-                  className="w-full py-2.5 border border-dashed border-white/20 text-gray-400 hover:text-white hover:border-white/40 rounded-xl text-sm font-bold transition-colors flex items-center justify-center gap-2">
-                  <Plus size={14} /> Tambah Lesson
-                </button>
-              </div>
-            )}
-          </div>
-        ))}
+          ))
+        )}
       </div>
     </div>
   );

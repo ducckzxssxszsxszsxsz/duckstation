@@ -39,7 +39,7 @@ const Batch = require('./models/Batch');
 const Order = require('./models/Order');
 const Module = require('./models/Module');
 const { Quiz, QuizAttempt } = require('./models/Quiz');
-const { Booking, BlockedDate } = require('./models/Booking');
+const { Booking, BlockedDate, AvailableSlot } = require('./models/Booking');
 const Ticket = require('./models/Ticket');
 const Broadcast = require('./models/Broadcast');
 
@@ -385,6 +385,50 @@ app.post('/api/broadcasts', protect, adminOnly, async (req, res) => {
     else if (target === 'batch6') reach = await User.countDocuments({ batchName: /Advanced|Pro/i, status: 'active' });
     const b = await Broadcast.create({ title, body, type, target, reach, sentAt: new Date() });
     res.status(201).json({ success: true, broadcast: b });
+  } catch (e) { res.status(500).json({ success: false, message: e.message }); }
+});
+
+// --- BOOKING SLOTS (admin configure available hours) ---
+app.get('/api/bookings/slots', protect, adminOnly, async (req, res) => {
+  try {
+    const { date } = req.query;
+    if (date) {
+      const config = await AvailableSlot.findOne({ date });
+      return res.json({ success: true, date, slots: config ? config.slots : [] });
+    }
+    const all = await AvailableSlot.find();
+    res.json({ success: true, configs: all });
+  } catch (e) { res.status(500).json({ success: false, message: e.message }); }
+});
+app.put('/api/bookings/slots', protect, adminOnly, async (req, res) => {
+  try {
+    const { date, slots } = req.body;
+    if (!date || !Array.isArray(slots)) return res.status(400).json({ success: false, message: 'Date and slots array required' });
+    const config = await AvailableSlot.findOneAndUpdate({ date }, { slots }, { upsert: true, new: true });
+    res.json({ success: true, config });
+  } catch (e) { res.status(500).json({ success: false, message: e.message }); }
+});
+
+// --- BROADCASTS (user) ---
+app.get('/api/broadcasts/latest', protect, async (req, res) => {
+  try { res.json({ success: true, broadcasts: await Broadcast.find().sort('-sentAt').limit(10) }); } catch (e) { res.status(500).json({ success: false, message: e.message }); }
+});
+
+// --- UNBLOCK DATE ---
+app.delete('/api/bookings/block-date/:date', protect, adminOnly, async (req, res) => {
+  try {
+    await BlockedDate.findOneAndDelete({ date: req.params.date });
+    res.json({ success: true, message: 'Date unblocked' });
+  } catch (e) { res.status(500).json({ success: false, message: e.message }); }
+});
+
+// --- RESCHEDULE BOOKING (admin) ---
+app.put('/api/bookings/:id/reschedule', protect, adminOnly, async (req, res) => {
+  try {
+    const { date, time } = req.body;
+    const b = await Booking.findByIdAndUpdate(req.params.id, { date, time, status: 'pending' }, { new: true });
+    if (!b) return res.status(404).json({ success: false, message: 'Not found' });
+    res.json({ success: true, booking: b });
   } catch (e) { res.status(500).json({ success: false, message: e.message }); }
 });
 

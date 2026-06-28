@@ -103,6 +103,23 @@ const api = {
   cancelBooking: (id) =>
     fetch(`${API_URL}/bookings/${id}/cancel`, { method: 'PUT', headers: headers() }).then(r => r.json()),
 
+  // Admin booking management
+  rescheduleBooking: (id, date, time) =>
+    fetch(`${API_URL}/bookings/${id}/reschedule`, { method: 'PUT', headers: headers(), body: JSON.stringify({ date, time }) }).then(r => r.json()),
+
+  blockDate: (date, note) =>
+    fetch(`${API_URL}/bookings/block-date`, { method: 'POST', headers: headers(), body: JSON.stringify({ date, note }) }).then(r => r.json()),
+
+  unblockDate: (date) =>
+    fetch(`${API_URL}/bookings/block-date/${date}`, { method: 'DELETE', headers: headers() }).then(r => r.json()),
+
+  // Admin ticket management
+  replyTicket: (id, text) =>
+    fetch(`${API_URL}/tickets/${id}/message`, { method: 'POST', headers: headers(), body: JSON.stringify({ text }) }).then(r => r.json()),
+
+  getTicketById: (id) =>
+    fetch(`${API_URL}/tickets/${id}`, { headers: headers() }).then(r => r.json()),
+
   getBookingSlots: (date) =>
     fetch(`${API_URL}/bookings/slots${date ? `?date=${date}` : ''}`, { headers: headers() }).then(r => r.json()),
 

@@ -1,11 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Bell, Send, Users, Zap, BookOpen } from 'lucide-react';
-
-const history = [
-  { id: 1, title: 'Sinyal Live Trade: XAUUSD Buy', target: 'Semua Member', type: 'signal',   sentAt: '28 Jun 2026 • 14:30', reach: 128 },
-  { id: 2, title: 'Materi Baru: SMC Advanced ditambahkan!', target: 'Batch 6 Pro', type: 'content',  sentAt: '27 Jun 2026 • 09:00', reach: 83 },
-  { id: 3, title: 'Reminder: Deadline Homework Modul 1', target: 'Batch 5 Basic', type: 'reminder', sentAt: '26 Jun 2026 • 12:00', reach: 45 },
-];
+import api from '../../services/api';
 
 const typeStyle = (t) => {
   if (t === 'signal')  return { cls: 'bg-green-500/20 text-green-400 border-green-500/30', label: 'Sinyal' };
@@ -18,6 +13,43 @@ const AdminBroadcast = () => {
   const [body, setBody] = useState('');
   const [target, setTarget] = useState('all');
   const [type, setType] = useState('signal');
+  const [broadcasts, setBroadcasts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [sending, setSending] = useState(false);
+
+  const fetchBroadcasts = async () => {
+    try {
+      const res = await api.getAllBroadcasts();
+      if (res.success) setBroadcasts(res.broadcasts || []);
+    } catch (err) {
+      console.error('Failed to fetch broadcasts:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchBroadcasts();
+  }, []);
+
+  const handleSend = async () => {
+    if (!title.trim() || !body.trim()) return;
+    setSending(true);
+    try {
+      const res = await api.createBroadcast({ title: title.trim(), body: body.trim(), target, type });
+      if (res.success) {
+        setTitle('');
+        setBody('');
+        setTarget('all');
+        setType('signal');
+        fetchBroadcasts();
+      }
+    } catch (err) {
+      console.error('Failed to create broadcast:', err);
+    } finally {
+      setSending(false);
+    }
+  };
 
   return (
     <div className="p-6 md:p-8 max-w-5xl mx-auto">
@@ -52,9 +84,9 @@ const AdminBroadcast = () => {
               <label className="text-xs text-gray-400 mb-1 block">Target Penerima</label>
               <select value={target} onChange={e => setTarget(e.target.value)}
                 className="w-full bg-brand-dark border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-primary/50">
-                <option value="all">Semua Member (128 orang)</option>
-                <option value="batch5">Batch 5 Basic (45 orang)</option>
-                <option value="batch6">Batch 6 Pro (83 orang)</option>
+                <option value="all">Semua Member</option>
+                <option value="batch5">Batch 5 Basic</option>
+                <option value="batch6">Batch 6 Pro</option>
               </select>
             </div>
 
@@ -72,8 +104,9 @@ const AdminBroadcast = () => {
                 className="w-full bg-brand-dark border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-primary/50 resize-none" />
             </div>
 
-            <button className="w-full py-3 bg-brand-primary text-brand-dark font-black rounded-xl hover:bg-yellow-400 transition-colors shadow-[0_0_15px_rgba(255,215,0,0.2)] flex items-center justify-center gap-2">
-              <Send size={18} /> Kirim Sekarang
+            <button onClick={handleSend} disabled={sending}
+              className="w-full py-3 bg-brand-primary text-brand-dark font-black rounded-xl hover:bg-yellow-400 transition-colors shadow-[0_0_15px_rgba(255,215,0,0.2)] flex items-center justify-center gap-2 disabled:opacity-50">
+              <Send size={18} /> {sending ? 'Mengirim...' : 'Kirim Sekarang'}
             </button>
           </div>
         </div>
@@ -82,24 +115,28 @@ const AdminBroadcast = () => {
         <div>
           <h3 className="font-bold text-lg mb-4">Riwayat Broadcast</h3>
           <div className="space-y-3">
-            {history.map(h => {
-              const s = typeStyle(h.type);
-              return (
-                <div key={h.id} className="bg-brand-secondary border border-white/10 rounded-xl p-4">
-                  <div className="flex items-start justify-between gap-3 mb-2">
-                    <p className="font-bold text-sm text-white">{h.title}</p>
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border shrink-0 ${s.cls}`}>{s.label}</span>
+            {loading ? (
+              <div className="p-6 text-center text-gray-500 text-sm">Memuat riwayat...</div>
+            ) : broadcasts.length === 0 ? (
+              <div className="p-6 text-center text-gray-500 text-sm">Belum ada broadcast.</div>
+            ) : (
+              broadcasts.map(h => {
+                const s = typeStyle(h.type);
+                return (
+                  <div key={h._id} className="bg-brand-secondary border border-white/10 rounded-xl p-4">
+                    <div className="flex items-start justify-between gap-3 mb-2">
+                      <p className="font-bold text-sm text-white">{h.title}</p>
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border shrink-0 ${s.cls}`}>{s.label}</span>
+                    </div>
+                    <div className="flex items-center gap-3 text-xs text-gray-500">
+                      <span>{h.target || 'Semua'}</span>
+                      <span>•</span>
+                      <span>{h.createdAt ? new Date(h.createdAt).toLocaleDateString('id-ID') : ''}</span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-3 text-xs text-gray-500">
-                    <div className="flex items-center gap-1"><Users size={11}/> {h.reach} penerima</div>
-                    <span>•</span>
-                    <span>{h.target}</span>
-                    <span>•</span>
-                    <span>{h.sentAt}</span>
-                  </div>
-                </div>
-              );
-            })}
+                );
+              })
+            )}
           </div>
         </div>
       </div>

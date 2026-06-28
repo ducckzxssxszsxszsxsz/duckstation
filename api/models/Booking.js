@@ -17,4 +17,12 @@ const blockedDateSchema = new mongoose.Schema({
 const Booking = mongoose.model('Booking', bookingSchema);
 const BlockedDate = mongoose.model('BlockedDate', blockedDateSchema);
 
-module.exports = { Booking, BlockedDate };
+// Available time slots configured by admin per date
+const availableSlotSchema = new mongoose.Schema({
+  date:  { type: String, required: true, unique: true },
+  slots: [{ type: String }],
+}, { timestamps: true });
+
+const AvailableSlot = mongoose.model('AvailableSlot', availableSlotSchema);
+
+module.exports = { Booking, BlockedDate, AvailableSlot };
