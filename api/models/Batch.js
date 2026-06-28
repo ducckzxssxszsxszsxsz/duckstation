@@ -7,6 +7,7 @@ const batchSchema = new mongoose.Schema({
   priceIdr:    { type: String, required: true },
   priceUsdt:   { type: String, required: true },
   discordRole: { type: String, required: true },
+  role:        { type: String, default: '' },
   status:      { type: String, enum: ['open', 'closed'], default: 'open' },
   features:    [{ type: String }],
   members:     { type: Number, default: 0 },

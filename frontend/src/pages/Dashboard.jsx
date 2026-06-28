@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
+import { Routes, Route, Link, useLocation, useNavigate, Navigate } from 'react-router-dom';
 import { BookOpen, Calendar, CheckSquare, MessageSquare, Shield, DollarSign, Crown, Play, Lock, ChevronRight, User, Settings, LogOut, Bell, AlertTriangle, RotateCcw, CheckCircle, Clock, ArrowRight, Menu, X } from 'lucide-react';
 import BookingPage from './BookingPage';
 import HomeworkPage from './HomeworkPage';
@@ -9,11 +9,12 @@ import HowToStart from './HowToStart';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 
-const SidebarLink = ({ to, icon: Icon, label, active, onClick }) => (
+const SidebarLink = ({ to, icon: Icon, label, active, onClick, disabled }) => (
   <Link 
-    to={to} 
-    onClick={onClick}
+    to={disabled ? '#' : to}
+    onClick={disabled ? (e) => e.preventDefault() : onClick}
     className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+      disabled ? 'opacity-40 cursor-not-allowed' :
       active 
         ? 'bg-brand-primary/10 text-brand-primary border border-brand-primary/20' 
         : 'text-gray-400 hover:text-white hover:bg-white/5'
@@ -21,6 +22,7 @@ const SidebarLink = ({ to, icon: Icon, label, active, onClick }) => (
   >
     <Icon size={20} />
     <span className="font-medium text-sm">{label}</span>
+    {disabled && <Lock size={14} className="ml-auto text-gray-500" />}
   </Link>
 );
 
@@ -28,6 +30,8 @@ const DashboardHome = () => {
   const navigate = useNavigate();
   const [modules, setModules] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
+  const isGuest = user?.role === 'guest';
 
   useEffect(() => {
     const fetchModules = async () => {
@@ -45,6 +49,8 @@ const DashboardHome = () => {
     fetchModules();
   }, []);
 
+  const visibleModules = isGuest ? modules.filter(m => m.free === true) : modules;
+
   return (
     <div className="p-4 sm:p-6 md:p-8 max-w-5xl mx-auto">
       {/* Header */}
@@ -59,17 +65,31 @@ const DashboardHome = () => {
         </button>
       </div>
 
+      {/* Guest Banner */}
+      {isGuest && (
+        <div className="mb-6 p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-2xl flex items-center gap-3">
+          <AlertTriangle size={20} className="text-yellow-400 shrink-0" />
+          <div>
+            <p className="text-yellow-300 font-bold text-sm">Anda masih guest. Bergabung dengan kelas untuk membuka semua materi.</p>
+          </div>
+          <button onClick={() => navigate('/dashboard/batches')}
+            className="ml-auto px-4 py-2 bg-brand-primary text-brand-dark font-bold rounded-xl text-xs hover:bg-yellow-400 transition-colors shrink-0">
+            Pilih Kelas
+          </button>
+        </div>
+      )}
+
       {/* Modules */}
       <div className="space-y-4">
         {loading ? (
           <div className="bg-brand-secondary border border-white/10 rounded-2xl p-8 text-center text-gray-400">Memuat modul...</div>
-        ) : modules.length === 0 ? (
+        ) : visibleModules.length === 0 ? (
           <div className="bg-brand-secondary border border-white/10 rounded-2xl p-8 text-center text-gray-400">
             <BookOpen size={40} className="mx-auto mb-3 opacity-30" />
             <p>Belum ada modul materi</p>
           </div>
         ) : (
-          modules.map((mod) => (
+          visibleModules.map((mod) => (
             <div key={mod._id}
               className={`border rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between transition-all group ${
                 mod.free
@@ -238,6 +258,7 @@ const Dashboard = () => {
   const currentPath = location.pathname;
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { user, logout } = useAuth();
+  const isGuest = user?.role === 'guest';
 
   const closeSidebar = () => setSidebarOpen(false);
 
@@ -270,8 +291,8 @@ const Dashboard = () => {
           <SidebarLink to="/dashboard/batches" icon={DollarSign} label="Pilih Kelas / Batch" active={currentPath === '/dashboard/batches'} onClick={closeSidebar} />
           
           <div className="text-xs font-bold text-gray-500 uppercase tracking-wider mt-6 mb-3 px-4 hidden md:block">Interaksi</div>
-          <SidebarLink to="/dashboard/booking" icon={Calendar} label="Booking 1-on-1" active={currentPath === '/dashboard/booking'} onClick={closeSidebar} />
-          <SidebarLink to="/dashboard/homework" icon={CheckSquare} label="Homework & Quiz" active={currentPath === '/dashboard/homework'} onClick={closeSidebar} />
+          <SidebarLink to="/dashboard/booking" icon={Calendar} label="Booking 1-on-1" active={currentPath === '/dashboard/booking'} onClick={closeSidebar} disabled={isGuest} />
+          <SidebarLink to="/dashboard/homework" icon={CheckSquare} label="Homework & Quiz" active={currentPath === '/dashboard/homework'} onClick={closeSidebar} disabled={isGuest} />
           <SidebarLink to="/dashboard/tickets" icon={MessageSquare} label="Private Ticketing" active={currentPath === '/dashboard/tickets'} onClick={closeSidebar} />
           
           <div className="text-xs font-bold text-gray-500 uppercase tracking-wider mt-6 mb-3 px-4 hidden md:block">Akun Saya</div>
@@ -312,8 +333,8 @@ const Dashboard = () => {
           <Route path="/" element={<DashboardHome />} />
           <Route path="/how-to" element={<HowToStart />} />
           <Route path="/batches" element={<BatchSelection />} />
-          <Route path="/booking" element={<BookingPage />} />
-          <Route path="/homework" element={<HomeworkPage />} />
+          <Route path="/booking" element={isGuest ? <Navigate to="/dashboard/batches" replace /> : <BookingPage />} />
+          <Route path="/homework" element={isGuest ? <Navigate to="/dashboard/batches" replace /> : <HomeworkPage />} />
           <Route path="/tickets" element={<TicketingPage />} />
           <Route path="/settings" element={<UserSettings />} />
           <Route path="*" element={<div className="p-8 text-gray-400 flex items-center justify-center h-full">Modul ini sedang dalam tahap pengembangan (WIP).</div>} />

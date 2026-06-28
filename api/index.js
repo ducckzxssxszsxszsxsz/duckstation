@@ -225,7 +225,15 @@ app.put('/api/orders/:id/approve', protect, adminOnly, async (req, res) => {
     if (!order) return res.status(404).json({ success: false, message: 'Not found' });
     order.status = 'approved'; await order.save();
     const user = await User.findById(order.user);
-    if (user) { user.status = 'active'; if (order.batch) user.discordRole = order.batch.discordRole; await user.save(); }
+    if (user) {
+      user.status = 'active';
+      if (order.batch) {
+        const batch = await Batch.findById(order.batch);
+        if (batch && batch.role) user.role = batch.role;
+        user.discordRole = order.batch.discordRole;
+      }
+      await user.save();
+    }
     res.json({ success: true, order });
   } catch (e) { res.status(500).json({ success: false, message: e.message }); }
 });
@@ -412,6 +420,23 @@ app.put('/api/bookings/slots', protect, adminOnly, async (req, res) => {
 // --- BROADCASTS (user) ---
 app.get('/api/broadcasts/latest', protect, async (req, res) => {
   try { res.json({ success: true, broadcasts: await Broadcast.find().sort('-sentAt').limit(10) }); } catch (e) { res.status(500).json({ success: false, message: e.message }); }
+});
+
+// --- MODULE ACCESS CHECK ---
+app.get('/api/modules/:id/access', protect, async (req, res) => {
+  try {
+    const mod = await Module.findById(req.params.id);
+    if (!mod) return res.status(404).json({ success: false, message: 'Module not found' });
+    if (mod.free) return res.json({ success: true, hasAccess: true });
+    if (!mod.roles || mod.roles.length === 0) return res.json({ success: true, hasAccess: true });
+    const hasAccess = mod.roles.includes(req.user.role) || req.user.role === 'admin';
+    res.json({ success: true, hasAccess });
+  } catch (e) { res.status(500).json({ success: false, message: e.message }); }
+});
+
+// --- USER ROLE INFO ---
+app.get('/api/auth/role', protect, async (req, res) => {
+  res.json({ success: true, role: req.user.role, user: { id: req.user._id, name: req.user.name, email: req.user.email, role: req.user.role, status: req.user.status } });
 });
 
 // --- UNBLOCK DATE ---

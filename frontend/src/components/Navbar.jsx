@@ -14,6 +14,17 @@ const Navbar = ({ isAdmin = false }) => {
     navigate('/');
   };
 
+  const getRoleBadge = () => {
+    if (!user?.role) return null;
+    if (user.role === 'admin') {
+      return <span className="text-[10px] bg-red-500/20 text-red-400 px-1.5 py-0.5 rounded font-bold">Admin</span>;
+    }
+    if (user.role === 'guest') {
+      return <span className="text-[10px] bg-yellow-500/20 text-yellow-400 px-1.5 py-0.5 rounded font-bold">Guest</span>;
+    }
+    return <span className="text-[10px] bg-green-500/20 text-green-400 px-1.5 py-0.5 rounded font-bold">{user.role}</span>;
+  };
+
   return (
     <nav className={`border-b backdrop-blur-xl sticky top-0 z-50 ${isAdmin ? 'border-red-500/20 bg-[#0a0a0f]/95' : 'border-white/10 bg-[#0B0B0F]/90'}`}>
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">
@@ -46,6 +57,7 @@ const Navbar = ({ isAdmin = false }) => {
                   <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#5865F2]/10 border border-[#5865F2]/20">
                     <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
                     <span className="text-xs font-semibold text-[#5865F2]">{user?.name || 'User'}</span>
+                    {getRoleBadge()}
                   </div>
                   <Link to="/dashboard" className="px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold transition-all text-sm border border-white/5">
                     Dashboard

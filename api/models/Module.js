@@ -20,6 +20,7 @@ const moduleSchema = new mongoose.Schema({
   batch:    { type: String, default: 'Semua Batch' },
   status:   { type: String, enum: ['draft', 'published'], default: 'draft' },
   free:     { type: Boolean, default: false },
+  roles:    [{ type: String }],
   lessons:  [lessonSchema],
   order:    { type: Number, default: 0 },
 }, { timestamps: true });

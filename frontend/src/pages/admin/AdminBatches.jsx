@@ -9,7 +9,7 @@ const AdminBatches = () => {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({
-    name: '', tier: 'Starter', priceIdr: '', priceUsdt: '', discordRole: '', status: 'open',
+    name: '', tier: 'Starter', priceIdr: '', priceUsdt: '', discordRole: '', roleName: '', status: 'open',
   });
 
   const fetchBatches = async () => {
@@ -39,7 +39,7 @@ const AdminBatches = () => {
       if (res.success) {
         fetchBatches();
         setShowForm(false);
-        setForm({ name: '', tier: 'Starter', priceIdr: '', priceUsdt: '', discordRole: '', status: 'open' });
+        setForm({ name: '', tier: 'Starter', priceIdr: '', priceUsdt: '', discordRole: '', roleName: '', status: 'open' });
       }
     } catch (err) {
       console.error('Failed to create batch:', err);
@@ -88,6 +88,11 @@ const AdminBatches = () => {
                 placeholder="$199" className="w-full bg-brand-dark border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-primary/50" />
             </div>
             <div>
+              <label className="text-xs text-gray-400 mb-1 block">Role untuk Member</label>
+              <input type="text" value={form.roleName} onChange={e => setForm({...form, roleName: e.target.value})}
+                placeholder="contoh: member-basic, pro-trader" className="w-full bg-brand-dark border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-primary/50" />
+            </div>
+            <div>
               <label className="text-xs text-gray-400 mb-1 block">ID Discord Role</label>
               <input type="text" value={form.discordRole} onChange={e => setForm({...form, discordRole: e.target.value})}
                 placeholder="e.g. 123456789012345678" className="w-full bg-brand-dark border border-white/10 rounded-xl px-4 py-2.5 text-sm font-mono text-white focus:outline-none focus:border-brand-primary/50" />
@@ -128,9 +133,11 @@ const AdminBatches = () => {
                       {batch.status === 'open' ? 'OPEN' : 'CLOSED'}
                     </span>
                   </div>
-                  <div className="flex items-center gap-3 text-sm text-gray-400">
+                  <div className="flex items-center gap-3 text-sm text-gray-400 flex-wrap">
                     <span>{batch.priceIdr || '-'} / {batch.priceUsdt || '-'}</span>
                     <span>•</span>
+                    {batch.roleName && <span>Role: <span className="text-green-400 font-medium">{batch.roleName}</span></span>}
+                    {batch.roleName && <span>•</span>}
                     <span>Discord Role: <span className="text-purple-400 font-medium">@{batch.discordRole || 'n/a'}</span></span>
                   </div>
                 </div>
