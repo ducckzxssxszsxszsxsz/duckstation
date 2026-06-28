@@ -146,7 +146,7 @@ const StepDiscord = ({ onNext, onBack }) => {
               </div>
               <div>
                 <p className="font-bold">Discord Akun</p>
-                <p className="text-xs text-gray-400">{discordLinked ? 'DuckTrader#1234 — Terhubung' : 'Belum terhubung — Wajib diisi'}</p>
+                <p className="text-xs text-gray-400">{discordLinked ? 'Terhubung' : 'Belum terhubung — Wajib diisi'}</p>
               </div>
             </div>
             {discordLinked

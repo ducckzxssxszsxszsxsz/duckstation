@@ -158,6 +158,7 @@ const LessonCard = ({ lesson, onUpdate, onDelete }) => {
 // ─── MAIN ───
 const AdminCourses = () => {
   const [modules, setModules] = useState([]);
+  const [batches, setBatches] = useState([]);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState(null);
   const [showForm, setShowForm] = useState(false);
@@ -183,6 +184,7 @@ const AdminCourses = () => {
       }
     };
     fetchModules();
+    api.getBatches().then(res => { if (res.success) setBatches(res.batches || []); }).catch(() => {});
   }, []);
 
   const updateModule = (modIdx, newData) => {
@@ -318,8 +320,7 @@ const AdminCourses = () => {
               <select value={newModule.batch} onChange={e => setNewModule({ ...newModule, batch: e.target.value })}
                 className="w-full bg-brand-dark border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-primary/50">
                 <option>Semua Batch</option>
-                <option>Batch 5 Basic</option>
-                <option>Batch 6 Pro</option>
+                {batches.map(b => <option key={b._id} value={b.name}>{b.name}</option>)}
               </select>
             </div>
             <div className="flex items-end gap-4">

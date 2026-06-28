@@ -60,7 +60,7 @@ const AdminOverview = () => {
     <div className="p-6 md:p-8 max-w-7xl mx-auto">
       <div className="mb-8">
         <h2 className="text-3xl font-bold mb-1">Admin Dashboard</h2>
-        <p className="text-gray-400">Selamat datang kembali, Super Admin. Berikut ringkasan hari ini.</p>
+        <p className="text-gray-400">Selamat datang kembali. Berikut ringkasan hari ini.</p>
       </div>
 
       {/* Stats */}

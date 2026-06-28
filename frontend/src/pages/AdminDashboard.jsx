@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { Routes, Route, Link, useLocation } from 'react-router-dom';
+import { Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, ShoppingBag, BookOpen, DollarSign,
   Calendar, Users, MessageSquare, Bell, LogOut, Shield, Settings, Menu, X
 } from 'lucide-react';
 import duckMascot from '../assets/duck-mascot-nobg.png';
+import { useAuth } from '../context/AuthContext';
 
 import AdminOverview   from './admin/AdminOverview';
 import AdminOrders     from './admin/AdminOrders';
@@ -39,6 +40,8 @@ const SidebarLink = ({ to, icon: Icon, label, active, badge, onClick }) => (
 
 const AdminDashboard = () => {
   const location  = useLocation();
+  const navigate  = useNavigate();
+  const { user, logout } = useAuth();
   const path      = location.pathname;
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -77,14 +80,14 @@ const AdminDashboard = () => {
           <SidebarLink to="/admin"           icon={LayoutDashboard} label="Dashboard"             active={path === '/admin'} onClick={closeSidebar} />
 
           <div className="text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-2 px-4 mt-5 hidden md:block">Manajemen</div>
-          <SidebarLink to="/admin/orders"    icon={ShoppingBag}     label="Order & Approval"      active={path === '/admin/orders'}   badge={3} onClick={closeSidebar} />
+          <SidebarLink to="/admin/orders"    icon={ShoppingBag}     label="Order & Approval"      active={path === '/admin/orders'}   onClick={closeSidebar} />
           <SidebarLink to="/admin/users"     icon={Users}           label="User List & Evaluasi"  active={path === '/admin/users'} onClick={closeSidebar} />
           <SidebarLink to="/admin/courses"   icon={BookOpen}        label="Course Builder"        active={path === '/admin/courses'} onClick={closeSidebar} />
           <SidebarLink to="/admin/batches"   icon={DollarSign}      label="Batch & Pricing"       active={path === '/admin/batches'} onClick={closeSidebar} />
 
           <div className="text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-2 px-4 mt-5 hidden md:block">Interaksi</div>
           <SidebarLink to="/admin/booking"   icon={Calendar}        label="Booking Control"       active={path === '/admin/booking'} onClick={closeSidebar} />
-          <SidebarLink to="/admin/tickets"   icon={MessageSquare}   label="Ticketing Inbox"       active={path === '/admin/tickets'} badge={5} onClick={closeSidebar} />
+          <SidebarLink to="/admin/tickets"   icon={MessageSquare}   label="Ticketing Inbox"       active={path === '/admin/tickets'} onClick={closeSidebar} />
           <SidebarLink to="/admin/broadcast" icon={Bell}            label="Broadcast & Notif"     active={path === '/admin/broadcast'} onClick={closeSidebar} />
         </div>
 
@@ -96,11 +99,11 @@ const AdminDashboard = () => {
                 <img src={duckMascot} alt="admin" className="w-full h-full object-contain scale-110" />
               </div>
               <div>
-                <p className="font-bold text-sm text-white">Super Admin</p>
+                <p className="font-bold text-sm text-white">{user?.name || 'Admin'}</p>
                 <p className="text-[10px] text-red-400 font-bold">Admin Access</p>
               </div>
             </div>
-            <button className="text-gray-500 hover:text-red-400 transition-colors" title="Logout">
+            <button onClick={() => { logout(); navigate('/'); }} className="text-gray-500 hover:text-red-400 transition-colors" title="Logout">
               <LogOut size={16} />
             </button>
           </div>

@@ -14,6 +14,7 @@ const AdminBroadcast = () => {
   const [target, setTarget] = useState('all');
   const [type, setType] = useState('signal');
   const [broadcasts, setBroadcasts] = useState([]);
+  const [batches, setBatches] = useState([]);
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
 
@@ -30,6 +31,7 @@ const AdminBroadcast = () => {
 
   useEffect(() => {
     fetchBroadcasts();
+    api.getBatches().then(res => { if (res.success) setBatches(res.batches || []); }).catch(() => {});
   }, []);
 
   const handleSend = async () => {
@@ -85,8 +87,7 @@ const AdminBroadcast = () => {
               <select value={target} onChange={e => setTarget(e.target.value)}
                 className="w-full bg-brand-dark border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-primary/50">
                 <option value="all">Semua Member</option>
-                <option value="batch5">Batch 5 Basic</option>
-                <option value="batch6">Batch 6 Pro</option>
+                {batches.map(b => <option key={b._id} value={b.name}>{b.name}</option>)}
               </select>
             </div>
 

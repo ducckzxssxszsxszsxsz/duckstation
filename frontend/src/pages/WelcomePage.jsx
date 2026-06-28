@@ -18,24 +18,11 @@ const WelcomePage = () => {
   const [loading, setLoading] = useState(false);
 
   const handleLogin = () => {
-    login('demo_token_123', {
-      id: '1',
-      name: 'Demo Trader',
-      email: 'demo@duckstation.com',
-      role: 'user',
-    });
-    navigate('/dashboard');
+    window.location.href = `${import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000'}/api/auth/google`;
   };
 
   const handleDiscordLogin = () => {
-    login('discord_demo_token', {
-      id: '2',
-      name: 'Discord Trader',
-      email: 'discord@duckstation.com',
-      role: 'user',
-      discordTag: 'Trader#0001',
-    });
-    navigate('/dashboard');
+    setShowLoginForm(true);
   };
 
   const handleGoogleSuccess = (data) => {
