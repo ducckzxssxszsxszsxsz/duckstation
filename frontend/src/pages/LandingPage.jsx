@@ -173,10 +173,6 @@ const LandingPage = () => {
             <div className="mt-12 flex items-center gap-6 text-sm text-gray-500 font-medium">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-full bg-brand-secondary border border-white/10 flex items-center justify-center"><Users size={14}/></div>
-                <span>2.4k+ Active Members</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-brand-secondary border border-white/10 flex items-center justify-center"><Shield size={14} className="text-green-400"/></div>
                 <span>Verified Access Only</span>
               </div>
             </div>

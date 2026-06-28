@@ -14,11 +14,8 @@ const AdminBooking = () => {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
-  const [availableSlots, setAvailableSlots] = useState(() => {
-    const init = {};
-    dates.forEach(d => { init[d.id] = [...ALL_SLOTS]; });
-    return init;
-  });
+  const [availableSlots, setAvailableSlots] = useState({});
+  const [slotsLoading, setSlotsLoading] = useState(false);
 
   const dateStr = dates[selectedDate]?.dateStr;
 
@@ -35,20 +32,44 @@ const AdminBooking = () => {
     }
   };
 
+  const fetchSlots = async (ds) => {
+    if (!ds) return;
+    setSlotsLoading(true);
+    try {
+      const res = await api.getBookingSlots(ds);
+      if (res.success) {
+        const slots = res.slots || [];
+        setAvailableSlots(prev => ({ ...prev, [ds]: slots }));
+      }
+    } catch (err) {
+      console.error('Failed to fetch slots:', err);
+    } finally {
+      setSlotsLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchBookings();
   }, [dateStr]);
 
+  useEffect(() => {
+    if (dateStr) fetchSlots(dateStr);
+  }, [dateStr]);
+
   const dayBookings = bookings;
 
-  const toggleSlot = (time) => {
-    setAvailableSlots(prev => {
-      const current = prev[selectedDate] || [];
-      const updated = current.includes(time) 
-        ? current.filter(t => t !== time)
-        : [...current, time];
-      return { ...prev, [selectedDate]: updated };
-    });
+  const toggleSlot = async (time) => {
+    const current = availableSlots[dateStr] || [];
+    const updated = current.includes(time)
+      ? current.filter(t => t !== time)
+      : [...current, time];
+    setAvailableSlots(prev => ({ ...prev, [dateStr]: updated }));
+    try {
+      await api.setBookingSlots(dateStr, updated);
+    } catch (err) {
+      console.error('Failed to save slots:', err);
+      setAvailableSlots(prev => ({ ...prev, [dateStr]: current }));
+    }
   };
 
   const handleConfirm = async (bookingId) => {
@@ -110,7 +131,7 @@ const AdminBooking = () => {
               </p>
               <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
                 {ALL_SLOTS.map(time => {
-                  const isActive = (availableSlots[selectedDate] || []).includes(time);
+                  const isActive = (availableSlots[dateStr] || []).includes(time);
                   return (
                     <button key={time} onClick={() => toggleSlot(time)}
                       className={`flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${isActive ? 'bg-green-500/20 border border-green-500/30 text-green-400' : 'bg-brand-dark border border-white/10 text-gray-500 opacity-50'}`}>
@@ -160,7 +181,7 @@ const AdminBooking = () => {
           <div className="bg-brand-secondary border border-white/10 rounded-2xl p-4 mb-4">
             <p className="text-xs text-gray-500 mb-2 font-bold">Jam Aktif Hari Ini:</p>
             <div className="flex flex-wrap gap-2">
-              {(availableSlots[selectedDate] || []).map(time => {
+              {(availableSlots[dateStr] || []).map(time => {
                 const isBooked = dayBookings.some(b => b.time === time);
                 return (
                   <span key={time} className={`px-3 py-1 rounded-lg text-xs font-bold ${isBooked ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/20' : 'bg-green-500/10 text-green-400 border border-green-500/20'}`}>

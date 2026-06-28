@@ -2,6 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { Plus, Edit, Trash2, ChevronDown, ChevronUp, FileText, Image, GripVertical, Upload, X, Eye, EyeOff, CheckCircle, MoveUp, MoveDown } from 'lucide-react';
 import api from '../../services/api';
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+
+const getHeaders = () => {
+  const h = { 'Content-Type': 'application/json' };
+  const token = localStorage.getItem('token');
+  if (token) h['Authorization'] = `Bearer ${token}`;
+  return h;
+};
+
 // ─── STEP EDITOR ───
 const StepEditor = ({ step, index, total, onUpdate, onDelete, onMoveUp, onMoveDown }) => {
   const [editing, setEditing] = useState(false);
@@ -205,11 +214,66 @@ const AdminCourses = () => {
     setModules(updated);
   };
 
-  const addModule = () => {
+  const addModule = async () => {
     if (!newModule.title) return;
-    setModules([...modules, { ...newModule, id: Date.now(), lessons: [] }]);
+    try {
+      const res = await fetch(`${API_URL}/modules`, {
+        method: 'POST',
+        headers: getHeaders(),
+        body: JSON.stringify(newModule),
+      }).then(r => r.json());
+      if (res.success) {
+        const modRes = await api.getAllModules();
+        if (modRes.success && modRes.modules) {
+          const mapped = modRes.modules.map(m => ({
+            ...m,
+            id: m._id,
+            lessons: (m.lessons || []).map(l => ({ ...l, id: l._id || l.id, steps: l.steps || [] })),
+          }));
+          setModules(mapped);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to create module:', err);
+    }
     setNewModule({ title: '', batch: 'Semua Batch', status: 'draft', free: false });
     setShowForm(false);
+  };
+
+  const saveModule = async (modIdx) => {
+    const mod = modules[modIdx];
+    try {
+      const res = await fetch(`${API_URL}/modules/${mod._id || mod.id}`, {
+        method: 'PUT',
+        headers: getHeaders(),
+        body: JSON.stringify({
+          title: mod.title,
+          batch: mod.batch,
+          status: mod.status,
+          free: mod.free,
+          lessons: (mod.lessons || []).map(l => ({
+            _id: l._id,
+            title: l.title,
+            status: l.status,
+            order: l.order,
+            steps: l.steps || [],
+          })),
+        }),
+      }).then(r => r.json());
+      if (res.success) {
+        const modRes = await api.getAllModules();
+        if (modRes.success && modRes.modules) {
+          const mapped = modRes.modules.map(m => ({
+            ...m,
+            id: m._id,
+            lessons: (m.lessons || []).map(l => ({ ...l, id: l._id || l.id, steps: l.steps || [] })),
+          }));
+          setModules(mapped);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to save module:', err);
+    }
   };
 
   return (
@@ -312,10 +376,16 @@ const AdminCourses = () => {
                       />
                     ))
                   )}
-                  <button onClick={() => addLesson(modIdx)}
-                    className="w-full py-2.5 border border-dashed border-white/20 text-gray-400 hover:text-white hover:border-white/40 rounded-xl text-sm font-bold transition-colors flex items-center justify-center gap-2">
-                    <Plus size={14} /> Tambah Lesson
-                  </button>
+                  <div className="flex gap-2">
+                    <button onClick={() => addLesson(modIdx)}
+                      className="flex-1 py-2.5 border border-dashed border-white/20 text-gray-400 hover:text-white hover:border-white/40 rounded-xl text-sm font-bold transition-colors flex items-center justify-center gap-2">
+                      <Plus size={14} /> Tambah Lesson
+                    </button>
+                    <button onClick={() => saveModule(modIdx)}
+                      className="px-5 py-2.5 bg-brand-primary text-brand-dark font-bold rounded-xl text-sm hover:bg-yellow-400 transition-colors">
+                      Simpan Modul
+                    </button>
+                  </div>
                 </div>
               )}
             </div>

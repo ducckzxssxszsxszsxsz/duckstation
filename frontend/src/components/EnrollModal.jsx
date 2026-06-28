@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { X, ChevronRight, ChevronLeft, MessageSquare, Copy, AlertCircle, Check, User, Phone, Mail, Upload } from 'lucide-react';
+import api from '../services/api';
 
 const steps = ['Syarat & Ketentuan', 'Data Diri', 'Binding Discord', 'Konfirmasi'];
 
@@ -180,9 +181,35 @@ const StepDiscord = ({ onNext, onBack }) => {
 };
 
 // Step 4: Konfirmasi
-const StepConfirm = ({ batch, onBack, onClose }) => {
+const StepConfirm = ({ batch, form, onBack, onClose }) => {
   const [submitted, setSubmitted] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleSubmit = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const res = await api.createOrder({
+        batchId: batch._id,
+        method: 'QRIS',
+        telegram: form.telegram,
+        fullName: form.fullName,
+        email: form.email,
+        discordTag: form.discordTag || '',
+      });
+      if (res.success) {
+        setSubmitted(true);
+      } else {
+        setError(res.message || 'Gagal mengirim pendaftaran.');
+      }
+    } catch (err) {
+      setError('Terjadi kesalahan. Silakan coba lagi.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (submitted) {
     return (
@@ -247,9 +274,10 @@ const StepConfirm = ({ batch, onBack, onClose }) => {
         <button onClick={onBack} className="px-5 py-3 rounded-xl font-bold text-gray-400 border border-white/10 hover:bg-white/5 transition-colors flex items-center gap-2">
           <ChevronLeft size={16}/> Kembali
         </button>
-        <button onClick={() => setSubmitted(true)}
-          className="flex-1 py-3 rounded-xl font-bold flex items-center justify-center gap-2 bg-brand-primary text-brand-dark hover:bg-yellow-400 transition-all">
-          Kirim Pendaftaran <ChevronRight size={18} />
+        {error && <p className="text-red-400 text-xs font-bold absolute bottom-20 left-0 right-0 text-center">{error}</p>}
+        <button onClick={handleSubmit} disabled={loading}
+          className="flex-1 py-3 rounded-xl font-bold flex items-center justify-center gap-2 bg-brand-primary text-brand-dark hover:bg-yellow-400 disabled:opacity-50 transition-all">
+          {loading ? 'Mengirim...' : <><span>Kirim Pendaftaran</span> <ChevronRight size={18} /></>}
         </button>
       </div>
     </div>
@@ -283,7 +311,7 @@ const EnrollModal = ({ batch, onClose }) => {
           {step === 0 && <StepTerms batch={batch} onNext={next} />}
           {step === 1 && <StepProfile onNext={next} onBack={back} form={form} setForm={setForm} />}
           {step === 2 && <StepDiscord onNext={next} onBack={back} />}
-          {step === 3 && <StepConfirm batch={batch} onBack={back} onClose={onClose} />}
+          {step === 3 && <StepConfirm batch={batch} form={form} onBack={back} onClose={onClose} />}
         </div>
       </div>
     </div>
