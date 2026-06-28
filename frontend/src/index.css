@@ -1,0 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-brand-dark text-white font-sans antialiased;
+  }
+}
+
+.duck-glow {
+  filter: drop-shadow(0 0 10px rgba(0, 229, 255, 0.5));
+}

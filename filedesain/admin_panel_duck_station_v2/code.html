@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="id"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Duck Trading - Pusat Kendali Admin</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Geist:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary-fixed": "#161e00",
+                        "surface": "#121315",
+                        "outline": "#8e9379",
+                        "tertiary": "#ffffff",
+                        "inverse-surface": "#e3e2e5",
+                        "on-error": "#690005",
+                        "surface-container-low": "#1b1c1e",
+                        "on-secondary-fixed": "#002022",
+                        "on-background": "#e3e2e5",
+                        "primary": "#ffffff",
+                        "surface-container-high": "#292a2c",
+                        "surface-container": "#1f2022",
+                        "primary-container": "#c3f400",
+                        "on-tertiary-fixed": "#1c1b1b",
+                        "secondary-fixed-dim": "#00dbe9",
+                        "on-tertiary-fixed-variant": "#474746",
+                        "secondary-container": "#00eefc",
+                        "on-error-container": "#ffdad6",
+                        "primary-fixed": "#c3f400",
+                        "background": "#121315",
+                        "surface-bright": "#38393b",
+                        "surface-variant": "#343537",
+                        "on-secondary-fixed-variant": "#004f54",
+                        "on-primary": "#283500",
+                        "surface-tint": "#abd600",
+                        "primary-fixed-dim": "#abd600",
+                        "surface-container-highest": "#343537",
+                        "on-secondary-container": "#00686f",
+                        "surface-dim": "#121315",
+                        "error-container": "#93000a",
+                        "secondary": "#d3fbff",
+                        "inverse-primary": "#506600",
+                        "on-tertiary": "#313030",
+                        "on-primary-container": "#556d00",
+                        "tertiary-fixed": "#e5e2e1",
+                        "outline-variant": "#444933",
+                        "on-secondary": "#00363a",
+                        "surface-container-lowest": "#0d0e10",
+                        "on-surface-variant": "#c4c9ac",
+                        "secondary-fixed": "#7df4ff",
+                        "on-surface": "#e3e2e5",
+                        "tertiary-fixed-dim": "#c8c6c5",
+                        "tertiary-container": "#e5e2e1",
+                        "on-tertiary-container": "#656464",
+                        "inverse-on-surface": "#303033",
+                        "on-primary-fixed-variant": "#3c4d00",
+                        "error": "#ffb4ab"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin": "32px",
+                        "gutter": "24px",
+                        "xl": "80px",
+                        "sm": "16px",
+                        "base": "4px",
+                        "xs": "8px",
+                        "md": "24px",
+                        "lg": "48px"
+                    },
+                    "fontFamily": {
+                        "headline-lg-mobile": ["Geist"],
+                        "body-md": ["Inter"],
+                        "display-xl": ["Geist"],
+                        "label-sm": ["Geist"],
+                        "mono-data": ["Geist"],
+                        "headline-lg": ["Geist"]
+                    },
+                    "fontSize": {
+                        "headline-lg-mobile": ["32px", {"lineHeight": "1.2", "fontWeight": "600"}],
+                        "body-md": ["16px", {"lineHeight": "1.6", "letterSpacing": "0", "fontWeight": "400"}],
+                        "display-xl": ["64px", {"lineHeight": "1.1", "letterSpacing": "-0.04em", "fontWeight": "700"}],
+                        "label-sm": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                        "mono-data": ["14px", {"lineHeight": "1.4", "letterSpacing": "-0.01em", "fontWeight": "400"}],
+                        "headline-lg": ["40px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            background-color: #0B0C0E;
+            color: #e3e2e5;
+            font-family: 'Inter', sans-serif;
+        }
+        .glass-card {
+            background: rgba(31, 32, 34, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        .neon-border-focus:focus {
+            border-color: #abd600;
+            box-shadow: 0 0 10px rgba(171, 214, 0, 0.3);
+            outline: none;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .nav-active {
+            background: rgba(171, 214, 0, 0.1);
+            color: #abd600;
+            border-left: 4px solid #abd600;
+        }
+        /* Custom scrollbar for webkit */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #343537;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #abd600;
+        }
+    </style>
+</head>
+<body class="flex min-h-screen overflow-hidden">
+<!-- Side Navigation Bar -->
+<aside class="fixed left-0 top-0 h-screen w-64 z-40 bg-surface-dim/80 backdrop-blur-2xl border-r border-white/10 flex flex-col p-md">
+<div class="mb-lg">
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile font-black text-primary-fixed-dim tracking-tighter">QUACK TRADER</h1>
+<p class="font-label-sm text-label-sm text-on-surface-variant mt-1 uppercase tracking-widest">Elite Mentor Status</p>
+</div>
+<nav class="flex-1 space-y-2">
+<a class="flex items-center gap-3 px-4 py-3 font-body-md text-body-md text-on-surface-variant hover:text-primary transition-all hover:translate-x-1" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+                Dashboard
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 font-body-md text-body-md text-on-surface-variant hover:text-primary transition-all hover:translate-x-1" href="#">
+<span class="material-symbols-outlined">calendar_month</span>
+                Calendar
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 font-body-md text-body-md text-on-surface-variant hover:text-primary transition-all hover:translate-x-1" href="#">
+<span class="material-symbols-outlined">school</span>
+                My Courses
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 font-body-md text-body-md text-on-surface-variant hover:text-primary transition-all hover:translate-x-1" href="#">
+<span class="material-symbols-outlined">hub</span>
+                Network Graph
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 font-body-md text-body-md bg-primary-fixed-dim/10 text-primary-fixed-dim border-l-4 border-primary-fixed-dim font-bold" href="#">
+<span class="material-symbols-outlined">admin_panel_settings</span>
+                Admin Panel
+            </a>
+</nav>
+<div class="mt-auto space-y-2 pt-lg border-t border-white/5">
+<a class="flex items-center gap-3 px-4 py-3 font-label-sm text-label-sm text-on-surface-variant hover:text-primary-fixed-dim transition-colors" href="#">
+<span class="material-symbols-outlined">settings</span>
+                Settings
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 font-label-sm text-label-sm text-on-surface-variant hover:text-primary-fixed-dim transition-colors" href="#">
+<span class="material-symbols-outlined">help</span>
+                Support
+            </a>
+<div class="p-4 bg-primary-fixed/5 rounded-xl border border-primary-fixed/10 mt-md">
+<p class="text-label-sm font-label-sm text-primary-fixed mb-2">QUACK PRO PLAN</p>
+<button class="w-full py-2 bg-primary-fixed text-on-primary-fixed rounded-lg font-bold text-xs uppercase tracking-wider hover:brightness-110 transition-all">
+                    Upgrade Plan
+                </button>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="ml-64 flex-1 flex flex-col h-screen overflow-y-auto">
+<!-- Top bar -->
+<header class="sticky top-0 w-full z-30 bg-surface/60 backdrop-blur-xl border-b border-white/10 px-margin py-4 flex justify-between items-center">
+<h2 class="font-headline-lg text-headline-lg font-bold text-primary-fixed-dim">Pusat Kendali Admin</h2>
+<div class="flex items-center gap-md">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+<input class="bg-surface-container-lowest border border-white/10 rounded-full pl-10 pr-4 py-2 text-sm focus:border-primary-fixed-dim focus:ring-1 focus:ring-primary-fixed-dim outline-none w-64" placeholder="Cari data..." type="text"/>
+</div>
+<button class="flex items-center gap-2 px-6 py-2 bg-primary-fixed-dim/10 border border-primary-fixed-dim/20 text-primary-fixed-dim rounded-full font-label-sm text-label-sm uppercase tracking-widest hover:bg-primary-fixed-dim hover:text-on-primary-fixed transition-all">
+                    Connect Wallet
+                </button>
+</div>
+</header>
+<div class="p-margin space-y-lg">
+<!-- Bento Stats Grid -->
+<section class="grid grid-cols-1 md:grid-cols-4 gap-gutter">
+<div class="glass-card p-md rounded-xl flex flex-col justify-between group cursor-pointer hover:bg-white/5 transition-all">
+<div class="flex justify-between items-start">
+<span class="material-symbols-outlined text-primary-fixed-dim">analytics</span>
+<span class="text-xs text-primary-fixed">+12%</span>
+</div>
+<div class="mt-4">
+<h3 class="text-label-sm font-label-sm text-on-surface-variant uppercase">Total Volume</h3>
+<p class="text-headline-lg font-headline-lg text-primary mt-1">12.4K <span class="text-sm font-normal">QUACK</span></p>
+</div>
+</div>
+<div class="glass-card p-md rounded-xl flex flex-col justify-between group cursor-pointer hover:bg-white/5 transition-all">
+<div class="flex justify-between items-start">
+<span class="material-symbols-outlined text-secondary-fixed-dim">group</span>
+<span class="text-xs text-secondary-fixed-dim">+4.5%</span>
+</div>
+<div class="mt-4">
+<h3 class="text-label-sm font-label-sm text-on-surface-variant uppercase">Member Baru</h3>
+<p class="text-headline-lg font-headline-lg text-primary mt-1">842</p>
+</div>
+</div>
+<div class="glass-card p-md rounded-xl flex flex-col justify-between group cursor-pointer hover:bg-white/5 transition-all">
+<div class="flex justify-between items-start">
+<span class="material-symbols-outlined text-primary-fixed-dim">confirmation_number</span>
+<span class="text-xs text-on-surface-variant">Pending</span>
+</div>
+<div class="mt-4">
+<h3 class="text-label-sm font-label-sm text-on-surface-variant uppercase">Tiket Terbuka</h3>
+<p class="text-headline-lg font-headline-lg text-primary mt-1">18</p>
+</div>
+</div>
+<div class="glass-card p-md rounded-xl flex flex-col justify-between group cursor-pointer hover:bg-white/5 transition-all">
+<div class="flex justify-between items-start">
+<span class="material-symbols-outlined text-secondary-fixed-dim">school</span>
+<span class="text-xs text-primary-fixed">Active</span>
+</div>
+<div class="mt-4">
+<h3 class="text-label-sm font-label-sm text-on-surface-variant uppercase">Kursus Aktif</h3>
+<p class="text-headline-lg font-headline-lg text-primary mt-1">24</p>
+</div>
+</div>
+</section>
+<!-- Order Management & Sessions Grid -->
+<section class="grid grid-cols-1 lg:grid-cols-3 gap-gutter">
+<!-- Manajemen Pesanan Table -->
+<div class="lg:col-span-2 glass-card rounded-xl overflow-hidden">
+<div class="px-md py-4 border-b border-white/5 flex justify-between items-center bg-white/2">
+<h3 class="font-label-sm text-label-sm uppercase tracking-widest flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-fixed-dim text-lg">shopping_cart</span>
+                            Manajemen Pesanan
+                        </h3>
+<button class="text-xs text-primary-fixed-dim hover:underline">Lihat Semua</button>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="border-b border-white/5 text-on-surface-variant font-label-sm text-label-sm uppercase">
+<th class="px-md py-4">Pembeli</th>
+<th class="px-md py-4">Produk</th>
+<th class="px-md py-4">Status</th>
+<th class="px-md py-4">Action</th>
+</tr>
+</thead>
+<tbody class="text-sm font-mono-data">
+<tr class="border-b border-white/5 hover:bg-white/5 transition-all group">
+<td class="px-md py-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-surface-container-highest flex items-center justify-center border border-primary-fixed-dim/20">
+<span class="material-symbols-outlined text-xs">person</span>
+</div>
+<div>
+<p class="text-primary">@cryptoduck_99</p>
+<a class="text-[10px] text-secondary-fixed-dim flex items-center gap-1 hover:underline" href="#">
+<span class="material-symbols-outlined text-[10px]">send</span> Telegram
+                                                </a>
+</div>
+</div>
+</td>
+<td class="px-md py-4">Elite Mentorship V2</td>
+<td class="px-md py-4">
+<span class="px-2 py-1 bg-primary-fixed/10 text-primary-fixed text-[10px] rounded uppercase font-bold">Paid</span>
+</td>
+<td class="px-md py-4">
+<button class="flex items-center gap-2 px-3 py-1.5 bg-primary-fixed text-on-primary-fixed rounded-md font-bold text-[11px] uppercase tracking-tighter hover:scale-105 active:scale-95 transition-all">
+<span class="material-symbols-outlined text-[14px]">diamond</span> Approve Discord
+                                        </button>
+</td>
+</tr>
+<tr class="border-b border-white/5 hover:bg-white/5 transition-all group">
+<td class="px-md py-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-surface-container-highest flex items-center justify-center border border-primary-fixed-dim/20">
+<span class="material-symbols-outlined text-xs">person</span>
+</div>
+<div>
+<p class="text-primary">@whale_watcher</p>
+<a class="text-[10px] text-secondary-fixed-dim flex items-center gap-1 hover:underline" href="#">
+<span class="material-symbols-outlined text-[10px]">send</span> Telegram
+                                                </a>
+</div>
+</div>
+</td>
+<td class="px-md py-4">Trading Signals Hub</td>
+<td class="px-md py-4">
+<span class="px-2 py-1 bg-yellow-500/10 text-yellow-500 text-[10px] rounded uppercase font-bold">Pending</span>
+</td>
+<td class="px-md py-4">
+<button class="flex items-center gap-2 px-3 py-1.5 bg-surface-container-high text-on-surface-variant rounded-md font-bold text-[11px] uppercase tracking-tighter cursor-not-allowed">
+                                            Wait Verification
+                                        </button>
+</td>
+</tr>
+<tr class="hover:bg-white/5 transition-all group">
+<td class="px-md py-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-surface-container-highest flex items-center justify-center border border-primary-fixed-dim/20">
+<span class="material-symbols-outlined text-xs">person</span>
+</div>
+<div>
+<p class="text-primary">@duckmaster</p>
+<a class="text-[10px] text-secondary-fixed-dim flex items-center gap-1 hover:underline" href="#">
+<span class="material-symbols-outlined text-[10px]">send</span> Telegram
+                                                </a>
+</div>
+</div>
+</td>
+<td class="px-md py-4">Ultimate Bot Course</td>
+<td class="px-md py-4">
+<span class="px-2 py-1 bg-primary-fixed/10 text-primary-fixed text-[10px] rounded uppercase font-bold">Paid</span>
+</td>
+<td class="px-md py-4">
+<button class="flex items-center gap-2 px-3 py-1.5 bg-primary-fixed text-on-primary-fixed rounded-md font-bold text-[11px] uppercase tracking-tighter hover:scale-105 active:scale-95 transition-all">
+<span class="material-symbols-outlined text-[14px]">diamond</span> Approve Discord
+                                        </button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Kontrol Sesi Booking Calendar -->
+<div class="glass-card rounded-xl overflow-hidden">
+<div class="px-md py-4 border-b border-white/5 flex justify-between items-center bg-white/2">
+<h3 class="font-label-sm text-label-sm uppercase tracking-widest flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary-fixed-dim text-lg">event_available</span>
+                            Booking Sesi
+                        </h3>
+</div>
+<div class="p-md">
+<div class="grid grid-cols-7 gap-1 text-center text-[10px] text-on-surface-variant uppercase font-bold mb-2">
+<div>S</div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div>
+</div>
+<div class="grid grid-cols-7 gap-1">
+<!-- Simple Calendar Mockup -->
+<div class="aspect-square flex items-center justify-center text-xs text-white/20">28</div>
+<div class="aspect-square flex items-center justify-center text-xs text-white/20">29</div>
+<div class="aspect-square flex items-center justify-center text-xs text-white/20">30</div>
+<div class="aspect-square flex items-center justify-center text-xs text-white">1</div>
+<div class="aspect-square flex items-center justify-center text-xs text-white">2</div>
+<div class="aspect-square flex items-center justify-center text-xs text-white bg-primary-fixed-dim/20 border border-primary-fixed-dim/30 rounded-md">3</div>
+<div class="aspect-square flex items-center justify-center text-xs text-white">4</div>
+<!-- ... Row 2 -->
+<div class="aspect-square flex items-center justify-center text-xs text-white">5</div>
+<div class="aspect-square flex items-center justify-center text-xs text-primary-fixed font-bold bg-primary-fixed/10 border border-primary-fixed/20 rounded-md">6</div>
+<div class="aspect-square flex items-center justify-center text-xs text-white">7</div>
+<div class="aspect-square flex items-center justify-center text-xs text-white">8</div>
+<div class="aspect-square flex items-center justify-center text-xs text-white">9</div>
+<div class="aspect-square flex items-center justify-center text-xs text-white">10</div>
+<div class="aspect-square flex items-center justify-center text-xs text-white">11</div>
+<!-- ... more days -->
+</div>
+<div class="mt-md space-y-3">
+<div class="flex items-center gap-3 p-3 bg-surface-container-low rounded-lg border-l-4 border-primary-fixed">
+<div class="text-xs">
+<p class="font-bold">14:00 - Live Mentor</p>
+<p class="text-on-surface-variant">Sesi bersama @ryan_k</p>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant ml-auto text-sm">more_vert</span>
+</div>
+<div class="flex items-center gap-3 p-3 bg-surface-container-low rounded-lg border-l-4 border-secondary-fixed-dim">
+<div class="text-xs">
+<p class="font-bold">16:30 - QA Market</p>
+<p class="text-on-surface-variant">Review Portofolio Global</p>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant ml-auto text-sm">more_vert</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Course Builder & Inbox Grid -->
+<section class="grid grid-cols-1 lg:grid-cols-2 gap-gutter">
+<!-- Course Builder (CRUD) -->
+<div class="glass-card rounded-xl">
+<div class="px-md py-4 border-b border-white/5 flex justify-between items-center">
+<h3 class="font-label-sm text-label-sm uppercase tracking-widest flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-fixed-dim text-lg">design_services</span>
+                            Course Builder
+                        </h3>
+<button class="flex items-center gap-1 px-3 py-1 bg-primary-fixed text-on-primary-fixed rounded text-[10px] font-bold uppercase">
+<span class="material-symbols-outlined text-sm">add</span> Buat Kursus
+                        </button>
+</div>
+<div class="p-md space-y-md">
+<div class="flex items-center justify-between p-4 bg-surface-container rounded-xl border border-white/5 hover:border-primary-fixed/30 transition-all cursor-pointer">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 bg-surface-container-highest rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-primary-fixed">play_circle</span>
+</div>
+<div>
+<h4 class="font-bold text-sm">Fundamental Web3 Trading</h4>
+<p class="text-xs text-on-surface-variant">12 Video • 3.2k Siswa</p>
+</div>
+</div>
+<div class="flex gap-2">
+<button class="w-8 h-8 rounded bg-white/5 flex items-center justify-center hover:bg-white/10"><span class="material-symbols-outlined text-sm">edit</span></button>
+<button class="w-8 h-8 rounded bg-red-500/10 text-red-400 flex items-center justify-center hover:bg-red-500/20"><span class="material-symbols-outlined text-sm">delete</span></button>
+</div>
+</div>
+<div class="flex items-center justify-between p-4 bg-surface-container rounded-xl border border-white/5 hover:border-primary-fixed/30 transition-all cursor-pointer">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 bg-surface-container-highest rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary-fixed-dim">query_stats</span>
+</div>
+<div>
+<h4 class="font-bold text-sm">Advanced Chart Pattern</h4>
+<p class="text-xs text-on-surface-variant">8 Video • 1.5k Siswa</p>
+</div>
+</div>
+<div class="flex gap-2">
+<button class="w-8 h-8 rounded bg-white/5 flex items-center justify-center hover:bg-white/10"><span class="material-symbols-outlined text-sm">edit</span></button>
+<button class="w-8 h-8 rounded bg-red-500/10 text-red-400 flex items-center justify-center hover:bg-red-500/20"><span class="material-symbols-outlined text-sm">delete</span></button>
+</div>
+</div>
+<div class="flex items-center justify-between p-4 bg-surface-container rounded-xl border border-white/5 hover:border-primary-fixed/30 transition-all cursor-pointer">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 bg-surface-container-highest rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-primary-fixed">robot_2</span>
+</div>
+<div>
+<h4 class="font-bold text-sm">AI Trading Bots Masterclass</h4>
+<p class="text-xs text-on-surface-variant">Draf • 0 Siswa</p>
+</div>
+</div>
+<div class="flex gap-2">
+<button class="w-8 h-8 rounded bg-white/5 flex items-center justify-center hover:bg-white/10"><span class="material-symbols-outlined text-sm">edit</span></button>
+<button class="w-8 h-8 rounded bg-red-500/10 text-red-400 flex items-center justify-center hover:bg-red-500/20"><span class="material-symbols-outlined text-sm">delete</span></button>
+</div>
+</div>
+</div>
+</div>
+<!-- Inbox Konsultasi -->
+<div class="glass-card rounded-xl flex flex-col">
+<div class="px-md py-4 border-b border-white/5 flex justify-between items-center">
+<h3 class="font-label-sm text-label-sm uppercase tracking-widest flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-fixed-dim text-lg">mail</span>
+                            Inbox Konsultasi
+                        </h3>
+<div class="flex gap-1">
+<span class="w-2 h-2 rounded-full bg-primary-fixed animate-pulse"></span>
+<span class="text-[10px] text-primary-fixed uppercase font-bold">3 Pesan Baru</span>
+</div>
+</div>
+<div class="flex-1 p-md space-y-4 overflow-y-auto max-h-[400px]">
+<!-- Chat item -->
+<div class="flex items-start gap-3 p-3 bg-white/2 rounded-xl border border-white/5 group hover:border-primary-fixed-dim/20 transition-all">
+<div class="w-10 h-10 rounded-full bg-surface-container-highest overflow-hidden border border-white/10">
+<img class="w-full h-full object-cover" data-alt="A stylized portrait of a high-tech robotic duck character, white armored plating with neon electric lime accents, glowing green eyes, set against a minimalist dark grey studio background, ultra-high definition digital art style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBX0Xbjy1eNLnBPoZtwEDUZuj--Cs-beZzvz4bnpB72pUx4mSp__Ni8j4kSjC-2CfpiT1pAwAa1rf_1B3E1oBfb-M2actSBOw1YaMLWDIneRqmbenQoZQOPv_Ekn4mh2j8jj_HOzOpBlgFV_MFOfmNAcn0NzhEfIViiNmNn6aavQPg_pG-TaP2wXYSv1F1hg0bHQijEmdpmpcvJSyLj314JX2sk9zcHVm891PySIEEbtkF7twxRyODF9gx5DcUBlOoDteyPtXtr6ORW"/>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-center mb-1">
+<h5 class="text-xs font-bold text-primary">Crypto_Ninja</h5>
+<span class="text-[10px] text-on-surface-variant">12:45</span>
+</div>
+<p class="text-xs text-on-surface-variant line-clamp-1">Halo mentor, saya butuh bantuan setting risk management di bot...</p>
+<div class="mt-2 flex gap-2">
+<button class="px-3 py-1 bg-primary-fixed/10 text-primary-fixed rounded text-[10px] font-bold uppercase hover:bg-primary-fixed hover:text-on-primary-fixed transition-all">Balas</button>
+<button class="px-3 py-1 text-on-surface-variant rounded text-[10px] font-bold uppercase hover:bg-white/5 transition-all">Arsip</button>
+</div>
+</div>
+</div>
+<!-- Chat item -->
+<div class="flex items-start gap-3 p-3 bg-white/2 rounded-xl border border-white/5">
+<div class="w-10 h-10 rounded-full bg-surface-container-highest overflow-hidden border border-white/10">
+<div class="w-full h-full flex items-center justify-center text-primary-fixed-dim font-bold">JD</div>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-center mb-1">
+<h5 class="text-xs font-bold text-primary">Joe_Ducker</h5>
+<span class="text-[10px] text-on-surface-variant">Kemarin</span>
+</div>
+<p class="text-xs text-on-surface-variant line-clamp-1">Terima kasih atas sesinya tadi pagi, sangat membantu!</p>
+</div>
+</div>
+<!-- Chat item -->
+<div class="flex items-start gap-3 p-3 bg-white/2 rounded-xl border border-white/5">
+<div class="w-10 h-10 rounded-full bg-surface-container-highest overflow-hidden border border-white/10">
+<div class="w-full h-full flex items-center justify-center text-primary-fixed-dim font-bold">BT</div>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-center mb-1">
+<h5 class="text-xs font-bold text-primary">Bullish_Trader</h5>
+<span class="text-[10px] text-on-surface-variant">2 Hari Lalu</span>
+</div>
+<p class="text-xs text-on-surface-variant line-clamp-1">Kapan kursus Arbitrage rilis? Sudah tidak sabar...</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- Footer -->
+<footer class="mt-auto bg-surface-container-lowest border-t border-white/5 py-xl px-margin">
+<div class="flex flex-col md:flex-row justify-between items-center max-w-7xl mx-auto w-full">
+<div class="mb-4 md:mb-0">
+<h4 class="font-headline-lg text-headline-lg text-primary-fixed-dim font-bold">Duck Trading</h4>
+<p class="font-label-sm text-label-sm text-on-surface-variant mt-2">© 2024 Duck Trading Ecosystem. All Rights Reserved.</p>
+</div>
+<div class="flex gap-md">
+<a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary-fixed-dim transition-colors" href="#">Privacy Policy</a>
+<a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary-fixed-dim transition-colors" href="#">Terms of Service</a>
+<a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary-fixed-dim transition-colors" href="#">Discord</a>
+<a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary-fixed-dim transition-colors" href="#">Twitter</a>
+</div>
+</div>
+</footer>
+</main>
+<!-- Floating Background Mascot Glow (Atmospheric effect) -->
+<div class="fixed bottom-0 right-0 w-[500px] h-[500px] pointer-events-none opacity-10 z-0">
+<div class="w-full h-full bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-primary-fixed-dim via-transparent to-transparent blur-3xl"></div>
+</div>
+<script>
+        // Micro-interaction: Dynamic scale for interactive cards
+        document.querySelectorAll('.glass-card').forEach(card => {
+            card.addEventListener('mousedown', () => card.style.transform = 'scale(0.98)');
+            card.addEventListener('mouseup', () => card.style.transform = 'scale(1)');
+            card.addEventListener('mouseleave', () => card.style.transform = 'scale(1)');
+        });
+
+        // Search highlight effect
+        const searchInput = document.querySelector('input[type="text"]');
+        searchInput.addEventListener('focus', () => {
+            searchInput.parentElement.classList.add('ring-2', 'ring-primary-fixed-dim/30');
+        });
+        searchInput.addEventListener('blur', () => {
+            searchInput.parentElement.classList.remove('ring-2', 'ring-primary-fixed-dim/30');
+        });
+    </script>
+</body></html>

@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="id"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Duck Trading | Duck Station</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Inter:wght@100..900&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Inter:wght@100..900&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-primary-fixed": "#161e00",
+                    "surface": "#121315",
+                    "outline": "#8e9379",
+                    "tertiary": "#ffffff",
+                    "inverse-surface": "#e3e2e5",
+                    "on-error": "#690005",
+                    "surface-container-low": "#1b1c1e",
+                    "on-secondary-fixed": "#002022",
+                    "on-background": "#e3e2e5",
+                    "primary": "#ffffff",
+                    "surface-container-high": "#292a2c",
+                    "surface-container": "#1f2022",
+                    "primary-container": "#c3f400",
+                    "on-tertiary-fixed": "#1c1b1b",
+                    "secondary-fixed-dim": "#00dbe9",
+                    "on-tertiary-fixed-variant": "#474746",
+                    "secondary-container": "#00eefc",
+                    "on-error-container": "#ffdad6",
+                    "primary-fixed": "#c3f400",
+                    "background": "#121315",
+                    "surface-bright": "#38393b",
+                    "surface-variant": "#343537",
+                    "on-secondary-fixed-variant": "#004f54",
+                    "on-primary": "#283500",
+                    "surface-tint": "#abd600",
+                    "primary-fixed-dim": "#abd600",
+                    "surface-container-highest": "#343537",
+                    "on-secondary-container": "#00686f",
+                    "surface-dim": "#121315",
+                    "error-container": "#93000a",
+                    "secondary": "#d3fbff",
+                    "inverse-primary": "#506600",
+                    "on-tertiary": "#313030",
+                    "on-primary-container": "#556d00",
+                    "tertiary-fixed": "#e5e2e1",
+                    "outline-variant": "#444933",
+                    "on-secondary": "#00363a",
+                    "surface-container-lowest": "#0d0e10",
+                    "on-surface-variant": "#c4c9ac",
+                    "secondary-fixed": "#7df4ff",
+                    "on-surface": "#e3e2e5",
+                    "tertiary-fixed-dim": "#c8c6c5",
+                    "tertiary-container": "#e5e2e1",
+                    "on-tertiary-container": "#656464",
+                    "inverse-on-surface": "#303033",
+                    "on-primary-fixed-variant": "#3c4d00",
+                    "error": "#ffb4ab"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "margin": "32px",
+                    "gutter": "24px",
+                    "xl": "80px",
+                    "sm": "16px",
+                    "base": "4px",
+                    "xs": "8px",
+                    "md": "24px",
+                    "lg": "48px"
+            },
+            "fontFamily": {
+                    "headline-lg-mobile": ["Geist"],
+                    "body-md": ["Inter"],
+                    "display-xl": ["Geist"],
+                    "label-sm": ["Geist"],
+                    "mono-data": ["Geist"],
+                    "headline-lg": ["Geist"]
+            },
+            "fontSize": {
+                    "headline-lg-mobile": ["32px", {"lineHeight": "1.2", "fontWeight": "600"}],
+                    "body-md": ["16px", {"lineHeight": "1.6", "letterSpacing": "0", "fontWeight": "400"}],
+                    "display-xl": ["64px", {"lineHeight": "1.1", "letterSpacing": "-0.04em", "fontWeight": "700"}],
+                    "label-sm": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                    "mono-data": ["14px", {"lineHeight": "1.4", "letterSpacing": "-0.01em", "fontWeight": "400"}],
+                    "headline-lg": ["40px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #0B0C0E;
+            color: #e3e2e5;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .glass-card {
+            background: rgba(27, 28, 30, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-card:hover {
+            border-color: #abd600;
+            box-shadow: 0 0 20px rgba(171, 214, 0, 0.15);
+        }
+
+        .neon-glow {
+            box-shadow: 0 0 15px rgba(171, 214, 0, 0.3);
+        }
+
+        .neon-border {
+            border-left: 2px solid #00dbe9;
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        .grid-pattern {
+            background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+
+        @keyframes pulse-lime {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 1; }
+        }
+
+        .node-pulse {
+            animation: pulse-lime 2s infinite;
+        }
+    </style>
+</head>
+<body class="font-body-md text-body-md overflow-x-hidden">
+<!-- Top Navigation -->
+<nav class="fixed top-0 w-full z-50 bg-surface/60 backdrop-blur-xl border-b border-white/10">
+<div class="flex justify-between items-center px-margin py-4 w-full max-w-[1440px] mx-auto">
+<div class="flex items-center gap-xs">
+<span class="font-headline-lg text-headline-lg font-bold text-primary-fixed-dim">Duck Trading</span>
+</div>
+<div class="hidden md:flex items-center gap-lg">
+<a class="font-label-sm text-label-sm uppercase tracking-widest text-primary-fixed-dim border-b-2 border-primary-fixed-dim pb-1" href="#">Network</a>
+<a class="font-label-sm text-label-sm uppercase tracking-widest text-on-surface-variant hover:text-primary transition-colors" href="#">Courses</a>
+<a class="font-label-sm text-label-sm uppercase tracking-widest text-on-surface-variant hover:text-primary transition-colors" href="#">Community</a>
+<a class="font-label-sm text-label-sm uppercase tracking-widest text-on-surface-variant hover:text-primary transition-colors" href="#">Academy</a>
+</div>
+<div class="flex items-center gap-md">
+<button class="font-label-sm text-label-sm uppercase tracking-widest text-on-surface-variant hover:text-primary transition-colors">Login</button>
+<button class="px-md py-base bg-primary-fixed text-on-primary-fixed font-label-sm text-label-sm uppercase tracking-widest rounded-lg neon-glow active:scale-95 transition-all">
+                    Connect Wallet
+                </button>
+</div>
+</div>
+</nav>
+<main class="relative pt-32 min-h-screen">
+<!-- Hero Section -->
+<section class="relative px-margin max-w-7xl mx-auto mb-xl">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter items-center">
+<div class="lg:col-span-7 z-10">
+<div class="inline-block px-sm py-base bg-primary-fixed-dim/10 rounded-full mb-md">
+<span class="text-primary-fixed-dim font-label-sm text-label-sm tracking-widest uppercase flex items-center gap-xs">
+<span class="material-symbols-outlined text-[14px]">bolt</span>
+                            Visi Masa Depan Trading
+                        </span>
+</div>
+<h1 class="font-display-xl text-display-xl lg:text-display-xl text-white mb-md leading-none">
+                        MASUK KE REALM <br/>
+<span class="text-primary-fixed-dim">SHADOW DIGITAL</span>
+</h1>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-xl mb-lg leading-relaxed">
+                        Membangun ekosistem trading terdesentralisasi yang menggabungkan presisi teknis dengan kekuatan komunitas. Navigasi pasar dengan Duck Station—pusat komando trading elite Anda.
+                    </p>
+<div class="flex flex-wrap gap-md">
+<button class="px-lg py-md bg-primary-fixed text-on-primary-fixed font-headline-lg-mobile text-[18px] font-bold rounded-xl neon-glow hover:-translate-y-1 transition-all">
+                            Mulai Perjalanan
+                        </button>
+<button class="px-lg py-md glass-card text-white font-headline-lg-mobile text-[18px] font-bold rounded-xl flex items-center gap-sm">
+<span class="material-symbols-outlined">play_circle</span>
+                            Lihat Demo
+                        </button>
+</div>
+</div>
+<div class="lg:col-span-5 relative">
+<div class="absolute inset-0 bg-primary-fixed-dim/20 blur-[120px] rounded-full"></div>
+<img class="relative z-10 w-full h-auto transform lg:scale-110 drop-shadow-[0_0_50px_rgba(171,214,0,0.3)]" src="https://lh3.googleusercontent.com/aida/AP1WRLtyGrQliTB6_DJZX-7I1O_JmpGxgSB6_PHW0pU3bNDkKE6zq5LQYfq_yvQm-4g1aF1duOwfFvUYWNEpkDCW1yr0PRYZy_kAJlp8WVZAVJTab7TIc8DimWoRG8Jk1CzicMJIdrnYZqZsmz94hkkAcSyMGx6ObmvRimXXLBuTJCttHe99quy1kauDjI1maX1fVzUjS1FbpNX7hleSxp20uHCUV6YUyYQIzURva366WHZCyRraQdqe7QlOdac"/>
+</div>
+</div>
+</section>
+<!-- Network Sentiment Graph (D3.js Placeholder) -->
+<section class="px-margin max-w-7xl mx-auto mb-xl">
+<div class="glass-card rounded-2xl p-md grid-pattern relative overflow-hidden min-h-[500px] flex flex-col">
+<div class="flex justify-between items-center mb-lg relative z-20">
+<div>
+<h2 class="font-headline-lg text-headline-lg text-white">Sentiment Network Graph</h2>
+<p class="text-on-surface-variant font-label-sm text-label-sm uppercase tracking-widest mt-1">Real-time Community Pulse Analysis</p>
+</div>
+<div class="flex gap-sm">
+<span class="flex items-center gap-xs font-mono-data text-mono-data bg-surface-container p-xs rounded-lg border border-white/5">
+<span class="w-2 h-2 rounded-full bg-primary-fixed-dim node-pulse"></span>
+                            ACTIVE NODES: 2,401
+                        </span>
+<span class="flex items-center gap-xs font-mono-data text-mono-data bg-surface-container p-xs rounded-lg border border-white/5 text-secondary-fixed-dim">
+<span class="w-2 h-2 rounded-full bg-secondary-fixed-dim"></span>
+                            SENTIMENT: BULLISH
+                        </span>
+</div>
+</div>
+<!-- Simulating D3.js Workspace -->
+<div class="flex-grow flex items-center justify-center relative">
+<div class="absolute inset-0 opacity-40">
+<svg height="100%" preserveaspectratio="none" viewbox="0 0 800 400" width="100%">
+<line opacity="0.3" stroke="#00dbe9" stroke-width="0.5" x1="100" x2="300" y1="100" y2="200"></line>
+<line opacity="0.6" stroke="#abd600" stroke-width="0.5" x1="300" x2="500" y1="200" y2="150"></line>
+<line opacity="1" stroke="#abd600" stroke-width="0.5" x1="500" x2="700" y1="150" y2="300"></line>
+<circle cx="100" cy="100" fill="#00dbe9" r="4"></circle>
+<circle cx="300" cy="200" fill="#abd600" r="6"></circle>
+<circle cx="500" cy="150" fill="#abd600" r="5"></circle>
+<circle class="node-pulse" cx="700" cy="300" fill="#abd600" r="8"></circle>
+</svg>
+</div>
+<div class="text-center z-10 max-w-sm">
+<span class="material-symbols-outlined text-[64px] text-primary-fixed-dim/20 mb-sm">hub</span>
+<p class="text-on-surface-variant text-body-md">Data visualization engine aktif. Melacak rute koneksi mentor dan aliran sentimen pasar global.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Bento Grid: Perjalanan Mentorship & Quack Analytics -->
+<section class="px-margin max-w-7xl mx-auto mb-xl">
+<div class="grid grid-cols-1 md:grid-cols-12 gap-gutter">
+<!-- Perjalanan Mentorship -->
+<div class="md:col-span-8 glass-card rounded-2xl p-lg flex flex-col justify-between overflow-hidden relative group">
+<div class="absolute top-0 right-0 p-lg opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-[120px]">school</span>
+</div>
+<div class="relative z-10">
+<h3 class="font-headline-lg text-headline-lg text-white mb-sm">Perjalanan Mentorship</h3>
+<p class="text-on-surface-variant font-body-md text-body-md max-w-lg mb-lg">
+                            Bukan sekadar kursus, tapi evolusi. Dari Duckling hingga Mentor, kami menyediakan kurikulum terstruktur yang dipandu oleh trader berpengalaman di industri.
+                        </p>
+<div class="space-y-md">
+<div class="flex items-center gap-md">
+<div class="w-12 h-12 rounded-xl bg-surface-container flex items-center justify-center text-primary-fixed-dim border border-white/5">
+<span class="material-symbols-outlined">terminal</span>
+</div>
+<div>
+<p class="text-white font-bold">Bootcamp Fundamental</p>
+<p class="text-on-surface-variant text-label-sm">Penguasaan dasar analisis teknikal.</p>
+</div>
+</div>
+<div class="flex items-center gap-md">
+<div class="w-12 h-12 rounded-xl bg-surface-container flex items-center justify-center text-secondary-fixed-dim border border-white/5">
+<span class="material-symbols-outlined">monitoring</span>
+</div>
+<div>
+<p class="text-white font-bold">Advanced Algo Trading</p>
+<p class="text-on-surface-variant text-label-sm">Optimasi bot dan strategi otomatis.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Quack Analytics -->
+<div class="md:col-span-4 glass-card rounded-2xl p-lg flex flex-col neon-border">
+<div class="mb-lg">
+<h3 class="font-headline-lg text-headline-lg text-white mb-sm">Quack Analytics</h3>
+<p class="text-on-surface-variant font-body-md text-body-md">Sinyal real-time berbasis AI yang memantau pergerakan whale di pasar crypto global.</p>
+</div>
+<div class="mt-auto space-y-sm">
+<div class="bg-black/40 p-sm rounded-lg flex justify-between items-center border border-white/5">
+<span class="font-mono-data text-mono-data text-on-surface-variant">BTC/USDT</span>
+<span class="font-mono-data text-mono-data text-primary-fixed-dim">+4.2%</span>
+</div>
+<div class="bg-black/40 p-sm rounded-lg flex justify-between items-center border border-white/5">
+<span class="font-mono-data text-mono-data text-on-surface-variant">SOL/USDT</span>
+<span class="font-mono-data text-mono-data text-primary-fixed-dim">+12.8%</span>
+</div>
+<div class="bg-black/40 p-sm rounded-lg flex justify-between items-center border border-white/5">
+<span class="font-mono-data text-mono-data text-on-surface-variant">ETH/USDT</span>
+<span class="font-mono-data text-mono-data text-secondary-fixed-dim">-1.5%</span>
+</div>
+<button class="w-full mt-md py-sm bg-surface-container-high text-white font-label-sm text-label-sm uppercase tracking-widest rounded-lg hover:bg-surface-bright transition-colors">
+                            Unlock Full Access
+                        </button>
+</div>
+</div>
+</div>
+</section>
+<!-- Floating Mascot Contextual Element -->
+<div class="fixed bottom-margin right-margin z-40 hidden lg:block">
+<div class="glass-card p-sm rounded-full flex items-center gap-sm pr-md border-primary-fixed-dim/30">
+<div class="w-10 h-10 rounded-full overflow-hidden bg-primary-fixed-dim/20 flex items-center justify-center">
+<img class="w-12 h-12 object-cover scale-150" src="https://lh3.googleusercontent.com/aida/AP1WRLtyGrQliTB6_DJZX-7I1O_JmpGxgSB6_PHW0pU3bNDkKE6zq5LQYfq_yvQm-4g1aF1duOwfFvUYWNEpkDCW1yr0PRYZy_kAJlp8WVZAVJTab7TIc8DimWoRG8Jk1CzicMJIdrnYZqZsmz94hkkAcSyMGx6ObmvRimXXLBuTJCttHe99quy1kauDjI1maX1fVzUjS1FbpNX7hleSxp20uHCUV6YUyYQIzURva366WHZCyRraQdqe7QlOdac"/>
+</div>
+<div>
+<p class="text-[10px] text-primary-fixed-dim font-bold uppercase tracking-widest">System Online</p>
+<p class="text-white text-xs font-bold">Duck Bot is active</p>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container-lowest py-xl border-t border-white/5">
+<div class="flex flex-col md:flex-row justify-between items-center px-margin max-w-7xl mx-auto">
+<div class="mb-md md:mb-0 text-center md:text-left">
+<span class="font-headline-lg text-headline-lg text-primary-fixed-dim block mb-xs">Duck Trading</span>
+<p class="font-label-sm text-label-sm text-on-surface-variant">© 2024 Duck Trading Ecosystem. All Rights Reserved.</p>
+</div>
+<div class="flex gap-lg">
+<a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary-fixed-dim transition-colors" href="#">Privacy Policy</a>
+<a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary-fixed-dim transition-colors" href="#">Terms of Service</a>
+<a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary-fixed-dim transition-colors" href="#">Discord</a>
+<a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary-fixed-dim transition-colors" href="#">Twitter</a>
+</div>
+</div>
+</footer>
+<script>
+        // Micro-interaction for buttons
+        document.querySelectorAll('button').forEach(button => {
+            button.addEventListener('mousedown', () => {
+                button.classList.add('scale-95');
+            });
+            button.addEventListener('mouseup', () => {
+                button.classList.remove('scale-95');
+            });
+            button.addEventListener('mouseleave', () => {
+                button</script></body></html>
