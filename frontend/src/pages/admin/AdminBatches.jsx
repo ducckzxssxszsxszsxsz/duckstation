@@ -9,7 +9,7 @@ const AdminBatches = () => {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({
-    name: '', tier: 'Starter', priceIdr: '', priceUsdt: '', discordRole: '', roleName: '', status: 'open', durationDays: 30,
+    name: '', tier: 'Starter', description: '', priceIdr: '', priceUsdt: '', discordRole: '', roleName: '', status: 'open', durationDays: 30,
   });
 
   const fetchBatches = async () => {
@@ -39,7 +39,7 @@ const AdminBatches = () => {
       if (res.success) {
         fetchBatches();
         setShowForm(false);
-        setForm({ name: '', tier: 'Starter', priceIdr: '', priceUsdt: '', discordRole: '', roleName: '', status: 'open', durationDays: 30 });
+        setForm({ name: '', tier: 'Starter', description: '', priceIdr: '', priceUsdt: '', discordRole: '', roleName: '', status: 'open', durationDays: 30 });
       }
     } catch (err) {
       console.error('Failed to create batch:', err);
@@ -76,6 +76,12 @@ const AdminBatches = () => {
                 <option>Starter</option>
                 <option>Pro</option>
               </select>
+            </div>
+            <div className="md:col-span-2">
+              <label className="text-xs text-gray-400 mb-1 block">Deskripsi Batch</label>
+              <textarea rows={3} value={form.description} onChange={e => setForm({...form, description: e.target.value})}
+                placeholder="Jelaskan tentang batch ini: apa yang dipelajari, target peserta, benefit, dll."
+                className="w-full bg-brand-dark border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-brand-primary/50 resize-none" />
             </div>
             <div>
               <label className="text-xs text-gray-400 mb-1 block">Harga (Rupiah)</label>
@@ -148,6 +154,7 @@ const AdminBatches = () => {
                     <span>•</span>
                     <span>Durasi: <span className="text-brand-primary font-medium">{batch.durationDays || 30} hari</span></span>
                   </div>
+                  {batch.description && <p className="text-xs text-gray-500 mt-2 line-clamp-2">{batch.description}</p>}
                 </div>
               </div>
               <div className="flex gap-2 shrink-0">
