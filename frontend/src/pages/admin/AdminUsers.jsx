@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Star, Eye, CheckSquare, AlertTriangle, ExternalLink, Crown, ChevronDown, Plus } from 'lucide-react';
+import { Search, Star, Eye, CheckSquare, AlertTriangle, ExternalLink, Crown, ChevronDown, Plus, Mail } from 'lucide-react';
 import api from '../../services/api';
 
 const AdminUsers = () => {
@@ -11,6 +11,10 @@ const AdminUsers = () => {
   const [durationDays, setDurationDays] = useState(30);
   const [extendDays, setExtendDays] = useState(7);
   const [extendingUser, setExtendingUser] = useState(null);
+  const [messageUser, setMessageUser] = useState(null);
+  const [messageSubject, setMessageSubject] = useState('');
+  const [messageBody, setMessageBody] = useState('');
+  const [sendingMessage, setSendingMessage] = useState(false);
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -50,6 +54,21 @@ const AdminUsers = () => {
       }
     } catch (err) {
       console.error('Failed to extend role:', err);
+    }
+  };
+
+  const handleSendMessage = async () => {
+    if (!messageUser || !messageSubject.trim() || !messageBody.trim()) return;
+    setSendingMessage(true);
+    try {
+      await api.sendMessage({ to: messageUser, subject: messageSubject, body: messageBody });
+      setMessageUser(null);
+      setMessageSubject('');
+      setMessageBody('');
+    } catch (err) {
+      console.error('Failed to send message:', err);
+    } finally {
+      setSendingMessage(false);
     }
   };
 
@@ -167,10 +186,16 @@ const AdminUsers = () => {
                             <button onClick={() => setExtendingUser(null)} className="px-2 py-1 bg-white/5 text-gray-400 rounded-lg text-[10px]">X</button>
                           </div>
                         ) : (
-                          <button onClick={() => setExtendingUser(u._id)}
-                            className="flex items-center gap-1 px-3 py-1.5 bg-white/5 text-gray-300 hover:text-white hover:bg-white/10 rounded-lg text-xs font-medium border border-white/10 transition-colors">
-                            <Plus size={12} /> Extend
-                          </button>
+                          <div className="flex gap-1">
+                            <button onClick={() => setExtendingUser(u._id)}
+                              className="flex items-center gap-1 px-3 py-1.5 bg-white/5 text-gray-300 hover:text-white hover:bg-white/10 rounded-lg text-xs font-medium border border-white/10 transition-colors">
+                              <Plus size={12} /> Extend
+                            </button>
+                            <button onClick={() => setMessageUser(u._id)}
+                              className="flex items-center gap-1 px-3 py-1.5 bg-brand-primary/10 text-brand-primary hover:bg-brand-primary/20 rounded-lg text-xs font-medium border border-brand-primary/20 transition-colors">
+                              <Mail size={12} /> Kirim Pesan
+                            </button>
+                          </div>
                         )}
                       </div>
                     </td>
@@ -184,6 +209,40 @@ const AdminUsers = () => {
           <div className="p-10 text-center text-gray-500">Tidak ada user ditemukan.</div>
         )}
       </div>
+
+      {/* Send Message Modal */}
+      {messageUser && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onClick={() => setMessageUser(null)}>
+          <div className="bg-brand-secondary border border-white/10 rounded-2xl p-6 w-full max-w-md" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 bg-brand-primary/10 rounded-xl"><Mail size={18} className="text-brand-primary" /></div>
+              <h3 className="font-bold text-lg">Kirim Pesan ke User</h3>
+            </div>
+            <div className="space-y-3">
+              <div>
+                <label className="text-xs text-gray-400 mb-1 block">Subject</label>
+                <input type="text" value={messageSubject} onChange={e => setMessageSubject(e.target.value)}
+                  placeholder="Subjek pesan..."
+                  className="w-full bg-brand-dark border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-brand-primary/50" />
+              </div>
+              <div>
+                <label className="text-xs text-gray-400 mb-1 block">Pesan</label>
+                <textarea value={messageBody} onChange={e => setMessageBody(e.target.value)}
+                  placeholder="Isi pesan..."
+                  rows={4}
+                  className="w-full bg-brand-dark border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-brand-primary/50 resize-none" />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 mt-4">
+              <button onClick={() => setMessageUser(null)} className="px-4 py-2 bg-white/5 text-gray-400 rounded-xl text-sm font-medium hover:bg-white/10 transition-colors">Batal</button>
+              <button onClick={handleSendMessage} disabled={sendingMessage || !messageSubject.trim() || !messageBody.trim()}
+                className="px-4 py-2 bg-brand-primary text-brand-dark font-bold rounded-xl text-sm hover:bg-yellow-400 transition-colors disabled:opacity-50">
+                {sendingMessage ? 'Mengirim...' : 'Kirim'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -169,6 +169,22 @@ const api = {
     fetch(`${API_URL}/notifications/read`, { method: 'PUT', headers: headers() }).then(r => r.json()),
   markNotifRead: (id) =>
     fetch(`${API_URL}/notifications/${id}/read`, { method: 'PUT', headers: headers() }).then(r => r.json()),
+
+  // Settings
+  getSettings: () =>
+    fetch(`${API_URL}/settings`, { headers: headers() }).then(r => r.json()),
+  updateSettings: (data) =>
+    fetch(`${API_URL}/settings`, { method: 'PUT', headers: headers(), body: JSON.stringify(data) }).then(r => r.json()),
+
+  // Messages
+  getMessages: () =>
+    fetch(`${API_URL}/messages`, { headers: headers() }).then(r => r.json()),
+  sendMessage: (data) =>
+    fetch(`${API_URL}/messages`, { method: 'POST', headers: headers(), body: JSON.stringify(data) }).then(r => r.json()),
+  markMessageRead: (id) =>
+    fetch(`${API_URL}/messages/${id}/read`, { method: 'PUT', headers: headers() }).then(r => r.json()),
+  deleteMessage: (id) =>
+    fetch(`${API_URL}/messages/${id}`, { method: 'DELETE', headers: headers() }).then(r => r.json()),
 };
 
 export default api;

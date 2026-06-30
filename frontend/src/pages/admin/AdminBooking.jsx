@@ -16,6 +16,7 @@ const AdminBooking = () => {
   const [showSettings, setShowSettings] = useState(false);
   const [availableSlots, setAvailableSlots] = useState({});
   const [slotsLoading, setSlotsLoading] = useState(false);
+  const [maxPerDay, setMaxPerDay] = useState(2);
 
   const dateStr = dates[selectedDate]?.dateStr;
 
@@ -55,6 +56,14 @@ const AdminBooking = () => {
   useEffect(() => {
     if (dateStr) fetchSlots(dateStr);
   }, [dateStr]);
+
+  useEffect(() => {
+    api.getSettings().then(res => { if (res.success && res.settings) setMaxPerDay(res.settings.maxBookingsPerDay || 2); }).catch(() => {});
+  }, []);
+
+  const saveCapacity = async () => {
+    try { await api.updateSettings({ maxBookingsPerDay: maxPerDay }); } catch {}
+  };
 
   const dayBookings = bookings;
 
@@ -142,6 +151,16 @@ const AdminBooking = () => {
                 })}
               </div>
             </div>
+          </div>
+          {/* Capacity Setting */}
+          <div className="mt-4 pt-4 border-t border-white/10">
+            <label className="text-xs text-gray-400 mb-1 block font-bold">Max Booking Per Hari</label>
+            <div className="flex items-center gap-3">
+              <input type="number" min="1" max="10" value={maxPerDay} onChange={e => setMaxPerDay(parseInt(e.target.value) || 2)}
+                className="w-24 bg-brand-dark border border-white/10 rounded-xl px-4 py-2 text-sm text-white text-center focus:outline-none focus:border-brand-primary/50" />
+              <button onClick={saveCapacity} className="px-4 py-2 bg-brand-primary text-brand-dark font-bold rounded-xl text-xs hover:bg-yellow-400 transition-colors">Simpan</button>
+            </div>
+            <p className="text-[10px] text-gray-500 mt-1">Jika kuota penuh, tanggal otomatis terkunci untuk user.</p>
           </div>
         </div>
       )}

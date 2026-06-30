@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, Link, useLocation, useNavigate, Navigate } from 'react-router-dom';
-import { BookOpen, Calendar, CheckSquare, MessageSquare, Shield, DollarSign, Crown, Play, Lock, ChevronRight, User, Settings, LogOut, Bell, AlertTriangle, RotateCcw, CheckCircle, Clock, ArrowRight, Menu, X, BarChart3 } from 'lucide-react';
+import { BookOpen, Calendar, CheckSquare, MessageSquare, Shield, DollarSign, Crown, Play, Lock, ChevronRight, User, Settings, LogOut, Bell, AlertTriangle, RotateCcw, CheckCircle, Clock, ArrowRight, Menu, X, BarChart3, Mail } from 'lucide-react';
 import BookingPage from './BookingPage';
 import HomeworkPage from './HomeworkPage';
 import TicketingPage from './TicketingPage';
 import BatchSelection from './BatchSelection';
 import HowToStart from './HowToStart';
 import JournalPage from './JournalPage';
+import MessagesPage from './MessagesPage';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 
@@ -297,6 +298,13 @@ const Dashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { user, logout } = useAuth();
   const isGuest = user?.role === 'guest';
+  const [unreadMessages, setUnreadMessages] = useState(0);
+
+  useEffect(() => {
+    api.getMessages().then(res => {
+      if (res.success) setUnreadMessages(res.unread || 0);
+    }).catch(() => {});
+  }, []);
 
   const closeSidebar = () => setSidebarOpen(false);
 
@@ -333,6 +341,12 @@ const Dashboard = () => {
           <SidebarLink to="/dashboard/homework" icon={CheckSquare} label="Homework & Quiz" active={currentPath === '/dashboard/homework'} onClick={closeSidebar} disabled={isGuest} />
           <SidebarLink to="/dashboard/journal" icon={BarChart3} label="Trading Journal" active={currentPath === '/dashboard/journal'} onClick={closeSidebar} disabled={isGuest} />
           <SidebarLink to="/dashboard/tickets" icon={MessageSquare} label="Private Ticketing" active={currentPath === '/dashboard/tickets'} onClick={closeSidebar} />
+          <div className="relative">
+            <SidebarLink to="/dashboard/messages" icon={Mail} label="Pesan Admin" active={currentPath === '/dashboard/messages'} onClick={closeSidebar} />
+            {unreadMessages > 0 && (
+              <span className="absolute top-1.5 right-2 w-5 h-5 bg-brand-primary text-brand-dark text-[10px] font-bold rounded-full flex items-center justify-center">{unreadMessages > 9 ? '9+' : unreadMessages}</span>
+            )}
+          </div>
           
           <div className="text-xs font-bold text-gray-500 uppercase tracking-wider mt-6 mb-3 px-4 hidden md:block">Akun Saya</div>
           <SidebarLink to="/dashboard/settings" icon={Settings} label="Pengaturan Akun" active={currentPath === '/dashboard/settings'} onClick={closeSidebar} />
@@ -384,6 +398,7 @@ const Dashboard = () => {
           <Route path="/homework" element={isGuest ? <Navigate to="/dashboard/batches" replace /> : <HomeworkPage />} />
           <Route path="/journal" element={isGuest ? <Navigate to="/dashboard/batches" replace /> : <JournalPage />} />
           <Route path="/tickets" element={<TicketingPage />} />
+          <Route path="/messages" element={<MessagesPage />} />
           <Route path="/settings" element={<UserSettings />} />
           <Route path="*" element={<div className="p-8 text-gray-400 flex items-center justify-center h-full">Modul ini sedang dalam tahap pengembangan (WIP).</div>} />
         </Routes>

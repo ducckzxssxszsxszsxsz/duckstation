@@ -9,6 +9,7 @@ const BookingPage = () => {
   const [loading, setLoading] = useState(false);
   const [booking, setBooking] = useState(false);
   const [message, setMessage] = useState(null);
+  const [capacityInfo, setCapacityInfo] = useState({ remaining: 0, maxPerDay: 2, bookedCount: 0 });
 
   const dates = Array.from({ length: 14 }, (_, i) => {
     const date = new Date();
@@ -32,6 +33,9 @@ const BookingPage = () => {
       .then(res => {
         if (res.success) {
           setSlots(res.slots || []);
+          const maxP = res.maxPerDay || 2;
+          const rem = res.remaining !== undefined ? res.remaining : Math.max(0, maxP - (res.booked || []).length);
+          setCapacityInfo({ remaining: rem, maxPerDay: maxP, bookedCount: maxP - rem });
         } else {
           setSlots([]);
         }
@@ -54,7 +58,12 @@ const BookingPage = () => {
         setSelectedTime(null);
         // Refresh slots
         const refresh = await api.getAvailableSlots(dateStr);
-        if (refresh.success) setSlots(refresh.slots || []);
+        if (refresh.success) {
+          setSlots(refresh.slots || []);
+          const maxP = refresh.maxPerDay || 2;
+          const rem = refresh.remaining !== undefined ? refresh.remaining : Math.max(0, maxP - (refresh.booked || []).length);
+          setCapacityInfo({ remaining: rem, maxPerDay: maxP, bookedCount: maxP - rem });
+        }
       } else {
         setMessage({ type: 'error', text: res.message || 'Gagal membuat booking.' });
       }
@@ -70,7 +79,7 @@ const BookingPage = () => {
       {/* Header */}
       <div className="mb-6 sm:mb-8">
         <h2 className="text-2xl sm:text-3xl font-bold mb-2">Booking Sesi 1-on-1</h2>
-        <p className="text-gray-400 text-sm sm:text-base">Jadwalkan sesi privat dengan mentor. Kuota maksimal 2 pengguna per hari secara global.</p>
+        <p className="text-gray-400 text-sm sm:text-base">Jadwalkan sesi privat dengan mentor. Kuota maksimal {capacityInfo.maxPerDay} pengguna per hari secara global.</p>
       </div>
 
       {/* Message */}
@@ -90,7 +99,7 @@ const BookingPage = () => {
         <AlertCircle size={24} className="text-brand-primary shrink-0" />
         <div>
           <p className="font-bold text-brand-primary text-sm sm:text-base">Kuota Terbatas</p>
-          <p className="text-xs sm:text-sm text-gray-300">Hanya tersisa <span className="text-white font-bold">{availableSlots}</span> slot pada hari yang dipilih. Waktu yang sudah dibooking otomatis terkunci.</p>
+          <p className="text-xs sm:text-sm text-gray-300">Kuota: <span className="text-white font-bold">{capacityInfo.bookedCount}/{capacityInfo.maxPerDay}</span> terisi, Sisa: <span className="text-white font-bold">{capacityInfo.remaining}</span> slot. Waktu yang sudah dibooking otomatis terkunci.</p>
         </div>
       </div>
 

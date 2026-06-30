@@ -44,6 +44,9 @@ const Ticket = require('./models/Ticket');
 const Broadcast = require('./models/Broadcast');
 const { Journal, Account } = require('./models/Journal');
 const Notification = require('./models/Notification');
+const Message = require('./models/Message');
+
+const settings = { maxBookingsPerDay: 2 };
 
 const generateToken = (id) => jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRE || '7d' });
 
@@ -369,7 +372,9 @@ app.get('/api/bookings/available', async (req, res) => {
     const booked = await Booking.find({ date, status: { $in: ['pending', 'confirmed'] } }).select('time');
     const bookedTimes = booked.map(b => b.time);
     const allSlots = ['10:00', '11:00', '13:00', '14:00', '15:00', '16:00', '19:00', '20:00'];
-    res.json({ success: true, available: true, slots: allSlots.map(t => ({ time: t, label: `${t} WIB`, available: !bookedTimes.includes(t) })), booked: bookedTimes });
+    const maxPerDay = settings.maxBookingsPerDay || 2;
+    const remaining = Math.max(0, maxPerDay - booked.length);
+    res.json({ success: true, available: true, slots: allSlots.map(t => ({ time: t, label: `${t} WIB`, available: !bookedTimes.includes(t) })), booked: bookedTimes, remaining, maxPerDay });
   } catch (e) { res.status(500).json({ success: false, message: e.message }); }
 });
 app.post('/api/bookings', protect, async (req, res) => {
@@ -380,7 +385,10 @@ app.post('/api/bookings', protect, async (req, res) => {
     const existing = await Booking.findOne({ date, time, status: { $in: ['pending', 'confirmed'] } });
     if (existing) return res.status(400).json({ success: false, message: 'Slot taken' });
     const dayBookings = await Booking.find({ date, status: { $in: ['pending', 'confirmed'] } });
-    if (dayBookings.length >= 2) return res.status(400).json({ success: false, message: 'Max 2 per day' });
+    const maxPerDay = settings.maxBookingsPerDay || 2;
+    if (dayBookings.length >= maxPerDay) {
+      return res.status(400).json({ success: false, message: `Kuota penuh untuk tanggal ini (maks ${maxPerDay} orang)` });
+    }
     const booking = await Booking.create({ user: req.user._id, date, time });
     const admins = await User.find({ role: 'admin' });
     for (const admin of admins) {
@@ -679,6 +687,7 @@ app.get('/api/admin/cleanup', protect, adminOnly, async (req, res) => {
     await Journal.deleteMany({});
     await Account.deleteMany({});
     await Notification.deleteMany({});
+    await Message.deleteMany({});
     res.json({ success: true, message: 'All data cleared except admin' });
   } catch (e) { res.status(500).json({ success: false, message: e.message }); }
 });
@@ -702,6 +711,52 @@ app.put('/api/notifications/read', protect, async (req, res) => {
 app.put('/api/notifications/:id/read', protect, async (req, res) => {
   try {
     await Notification.findByIdAndUpdate(req.params.id, { read: true });
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ success: false, message: e.message }); }
+});
+
+// --- SETTINGS ---
+app.get('/api/settings', protect, async (req, res) => {
+  try {
+    res.json({ success: true, settings });
+  } catch (e) { res.status(500).json({ success: false, message: e.message }); }
+});
+
+app.put('/api/settings', protect, adminOnly, async (req, res) => {
+  try {
+    if (req.body.maxBookingsPerDay !== undefined) settings.maxBookingsPerDay = parseInt(req.body.maxBookingsPerDay) || 2;
+    res.json({ success: true, settings });
+  } catch (e) { res.status(500).json({ success: false, message: e.message }); }
+});
+
+// --- MESSAGES ---
+app.get('/api/messages', protect, async (req, res) => {
+  try {
+    const messages = await Message.find({ to: req.user._id }).sort('-createdAt').populate('from', 'name email role');
+    const unread = await Message.countDocuments({ to: req.user._id, read: false });
+    res.json({ success: true, messages, unread });
+  } catch (e) { res.status(500).json({ success: false, message: e.message }); }
+});
+
+app.post('/api/messages', protect, adminOnly, async (req, res) => {
+  try {
+    const { to, subject, body } = req.body;
+    const message = await Message.create({ from: req.user._id, to, subject, body });
+    await Notification.create({ user: to, title: `Pesan dari Admin: ${subject}`, message: body, type: 'system', link: '/dashboard/messages' });
+    res.status(201).json({ success: true, message });
+  } catch (e) { res.status(500).json({ success: false, message: e.message }); }
+});
+
+app.put('/api/messages/:id/read', protect, async (req, res) => {
+  try {
+    await Message.findByIdAndUpdate(req.params.id, { read: true });
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ success: false, message: e.message }); }
+});
+
+app.delete('/api/messages/:id', protect, async (req, res) => {
+  try {
+    await Message.findByIdAndDelete(req.params.id);
     res.json({ success: true });
   } catch (e) { res.status(500).json({ success: false, message: e.message }); }
 });
