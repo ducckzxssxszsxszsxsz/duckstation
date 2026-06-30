@@ -15,6 +15,17 @@ const getHeaders = () => {
 const StepEditor = ({ step, index, total, onUpdate, onDelete, onMoveUp, onMoveDown }) => {
   const [editing, setEditing] = useState(false);
 
+  const handleImageUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) { alert('Maksimal 5MB'); return; }
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      onUpdate({ ...step, content: ev.target.result, imageUrl: ev.target.result });
+    };
+    reader.readAsDataURL(file);
+  };
+
   return (
     <div className={`rounded-xl border transition-all ${step.type === 'text' ? 'border-green-500/20 bg-green-500/5' : 'border-purple-500/20 bg-purple-500/5'}`}>
       <div className="flex items-center gap-3 px-4 py-3">
@@ -46,12 +57,23 @@ const StepEditor = ({ step, index, total, onUpdate, onDelete, onMoveUp, onMoveDo
               className="w-full bg-brand-dark border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-brand-primary/50 resize-none" />
           ) : (
             <>
-              <div className="border-2 border-dashed border-white/10 rounded-xl p-6 text-center hover:border-purple-500/30 transition-colors cursor-pointer bg-brand-dark">
-                <Upload size={24} className="mx-auto mb-2 text-gray-500" />
-                <p className="text-xs text-gray-400">Klik atau drag & drop gambar ke sini</p>
-                <p className="text-[10px] text-gray-600 mt-1">JPG, PNG, WebP • Max 5MB</p>
-              </div>
-              <textarea rows={3} value={step.description} onChange={e => onUpdate({ ...step, description: e.target.value })}
+              {(step.content || step.imageUrl) ? (
+                <div className="relative group">
+                  <img src={step.content || step.imageUrl} alt="Upload" className="w-full max-h-64 object-contain rounded-xl border border-white/10" />
+                  <button onClick={() => onUpdate({ ...step, content: '', imageUrl: '' })}
+                    className="absolute top-2 right-2 p-1.5 bg-red-500/80 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity">
+                    <X size={14} />
+                  </button>
+                </div>
+              ) : (
+                <label className="block border-2 border-dashed border-white/10 rounded-xl p-6 text-center hover:border-purple-500/30 transition-colors cursor-pointer bg-brand-dark">
+                  <Upload size={24} className="mx-auto mb-2 text-gray-500" />
+                  <p className="text-xs text-gray-400">Klik untuk upload gambar</p>
+                  <p className="text-[10px] text-gray-600 mt-1">JPG, PNG, WebP • Max 5MB</p>
+                  <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+                </label>
+              )}
+              <textarea rows={3} value={step.description || ''} onChange={e => onUpdate({ ...step, description: e.target.value })}
                 placeholder="Deskripsi / penjelasan untuk gambar ini..."
                 className="w-full bg-brand-dark border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-brand-primary/50 resize-none" />
             </>
