@@ -34,17 +34,7 @@ app.use(async (req, res, next) => {
 
 // Auth routes inline (avoid require issues on Vercel)
 const jwt = require('jsonwebtoken');
-const User = require('./models/User');
-const Batch = require('./models/Batch');
-const Order = require('./models/Order');
-const Module = require('./models/Module');
-const { Quiz, QuizAttempt } = require('./models/Quiz');
-const { Booking, BlockedDate, AvailableSlot } = require('./models/Booking');
-const Ticket = require('./models/Ticket');
-const Broadcast = require('./models/Broadcast');
-const { Journal, Account } = require('./models/Journal');
-const Notification = require('./models/Notification');
-const Message = require('./models/Message');
+const { User, Batch, Booking, BlockedDate, AvailableSlot, Module, Order, Quiz, QuizAttempt, Ticket, Broadcast, Journal, Account, Message, Notification } = require('./models');
 
 const settings = { maxBookingsPerDay: 2 };
 
