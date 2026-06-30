@@ -1,13 +1,37 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { MessageSquare, Shield, LogOut } from 'lucide-react';
+import { MessageSquare, Shield, LogOut, Bell } from 'lucide-react';
 import duckMascot from '../assets/duck-mascot-nobg.png';
 import { useAuth } from '../context/AuthContext';
+import api from '../services/api';
 
 const Navbar = ({ isAdmin = false }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, isLoggedIn, logout } = useAuth();
+  const [notifs, setNotifs] = useState([]);
+  const [unread, setUnread] = useState(0);
+  const [showNotifs, setShowNotifs] = useState(false);
+  const notifRef = useRef(null);
+
+  useEffect(() => {
+    if (!isLoggedIn) return;
+    const fetchNotifs = async () => {
+      try {
+        const res = await api.getNotifications();
+        if (res.success) { setNotifs(res.notifications || []); setUnread(res.unread || 0); }
+      } catch {}
+    };
+    fetchNotifs();
+    const interval = setInterval(fetchNotifs, 30000);
+    return () => clearInterval(interval);
+  }, [isLoggedIn]);
+
+  useEffect(() => {
+    const handleClick = (e) => { if (notifRef.current && !notifRef.current.contains(e.target)) setShowNotifs(false); };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
 
   const handleLogout = () => {
     logout();
@@ -64,6 +88,36 @@ const Navbar = ({ isAdmin = false }) => {
                   </Link>
                 </>
               )}
+              <div ref={notifRef} className="relative">
+                <button onClick={() => setShowNotifs(!showNotifs)} className="relative p-2 rounded-xl hover:bg-white/10 text-gray-400 hover:text-white transition-colors">
+                  <Bell size={18} />
+                  {unread > 0 && <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-red-500 text-white rounded-full text-[9px] font-bold flex items-center justify-center">{unread > 9 ? '9+' : unread}</span>}
+                </button>
+                {showNotifs && (
+                  <div className="absolute right-0 top-full mt-2 w-80 bg-[#12121A] border border-white/10 rounded-2xl shadow-2xl z-50 overflow-hidden">
+                    <div className="flex items-center justify-between p-4 border-b border-white/10">
+                      <h4 className="font-bold text-sm">Notifikasi</h4>
+                      {unread > 0 && <button onClick={async () => { await api.markAllRead(); setUnread(0); setNotifs(n => n.map(x => ({...x, read: true}))); }} className="text-[10px] text-brand-primary font-bold hover:underline">Tandai semua dibaca</button>}
+                    </div>
+                    <div className="max-h-80 overflow-y-auto">
+                      {notifs.length === 0 ? (
+                        <p className="p-6 text-center text-gray-500 text-sm">Belum ada notifikasi</p>
+                      ) : notifs.map(n => (
+                        <div key={n._id} className={`px-4 py-3 border-b border-white/5 hover:bg-white/5 transition-colors cursor-pointer ${!n.read ? 'bg-brand-primary/5' : ''}`} onClick={async () => { if (!n.read) { await api.markNotifRead(n._id); setUnread(u => Math.max(0, u - 1)); setNotifs(prev => prev.map(x => x._id === n._id ? {...x, read: true} : x)); } if (n.link) { navigate(n.link); setShowNotifs(false); } }}>
+                          <div className="flex items-start gap-2">
+                            {!n.read && <div className="w-2 h-2 rounded-full bg-brand-primary shrink-0 mt-1.5"></div>}
+                            <div className={!n.read ? '' : 'ml-4'}>
+                              <p className="text-xs font-bold text-white">{n.title}</p>
+                              <p className="text-[11px] text-gray-400 mt-0.5 line-clamp-2">{n.message}</p>
+                              <p className="text-[10px] text-gray-600 mt-1">{new Date(n.createdAt).toLocaleString('id-ID')}</p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
               <button onClick={handleLogout}
                 className="p-2 rounded-xl hover:bg-red-500/10 text-gray-400 hover:text-red-400 transition-colors" title="Logout">
                 <LogOut size={18} />

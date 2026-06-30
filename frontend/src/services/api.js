@@ -161,6 +161,14 @@ const api = {
     fetch(`${API_URL}/journal/${id}`, { method: 'DELETE', headers: headers() }).then(r => r.json()),
   getJournalStats: (accountId) =>
     fetch(`${API_URL}/journal/stats${accountId ? `?accountId=${accountId}` : ''}`, { headers: headers() }).then(r => r.json()),
+
+  // Notifications
+  getNotifications: () =>
+    fetch(`${API_URL}/notifications`, { headers: headers() }).then(r => r.json()),
+  markAllRead: () =>
+    fetch(`${API_URL}/notifications/read`, { method: 'PUT', headers: headers() }).then(r => r.json()),
+  markNotifRead: (id) =>
+    fetch(`${API_URL}/notifications/${id}/read`, { method: 'PUT', headers: headers() }).then(r => r.json()),
 };
 
 export default api;

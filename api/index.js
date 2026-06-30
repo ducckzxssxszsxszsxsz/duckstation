@@ -43,6 +43,7 @@ const { Booking, BlockedDate, AvailableSlot } = require('./models/Booking');
 const Ticket = require('./models/Ticket');
 const Broadcast = require('./models/Broadcast');
 const { Journal, Account } = require('./models/Journal');
+const Notification = require('./models/Notification');
 
 const generateToken = (id) => jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRE || '7d' });
 
@@ -285,11 +286,18 @@ app.put('/api/orders/:id/approve', protect, adminOnly, async (req, res) => {
       }
       await user.save();
     }
+    await Notification.create({ user: order.user, title: 'Pendaftaran Disetujui', message: `Selamat! Pendaftaran Anda untuk ${order.batchName} telah disetujui. Akses kelas sudah aktif.`, type: 'order', link: '/dashboard' });
     res.json({ success: true, order });
   } catch (e) { res.status(500).json({ success: false, message: e.message }); }
 });
 app.put('/api/orders/:id/reject', protect, adminOnly, async (req, res) => {
-  try { const o = await Order.findByIdAndUpdate(req.params.id, { status: 'rejected', note: req.body.note || '' }, { new: true }); res.json({ success: true, order: o }); } catch (e) { res.status(500).json({ success: false, message: e.message }); }
+  try {
+    const o = await Order.findByIdAndUpdate(req.params.id, { status: 'rejected', note: req.body.note || '' }, { new: true });
+    if (o) {
+      await Notification.create({ user: o.user, title: 'Pendaftaran Ditolak', message: `Maaf, pendaftaran Anda untuk ${o.batchName} ditolak. Hubungi admin untuk info lebih lanjut.`, type: 'order', link: '/dashboard/batches' });
+    }
+    res.json({ success: true, order: o });
+  } catch (e) { res.status(500).json({ success: false, message: e.message }); }
 });
 
 // ─── MODULES ───
@@ -374,6 +382,10 @@ app.post('/api/bookings', protect, async (req, res) => {
     const dayBookings = await Booking.find({ date, status: { $in: ['pending', 'confirmed'] } });
     if (dayBookings.length >= 2) return res.status(400).json({ success: false, message: 'Max 2 per day' });
     const booking = await Booking.create({ user: req.user._id, date, time });
+    const admins = await User.find({ role: 'admin' });
+    for (const admin of admins) {
+      await Notification.create({ user: admin._id, title: 'Booking Baru', message: `${req.user.name} melakukan booking pada ${date} jam ${time}.`, type: 'booking', link: '/admin/booking' });
+    }
     res.status(201).json({ success: true, booking });
   } catch (e) { res.status(500).json({ success: false, message: e.message }); }
 });
@@ -384,10 +396,22 @@ app.get('/api/bookings', protect, adminOnly, async (req, res) => {
   try { const f = req.query.date ? { date: req.query.date } : {}; res.json({ success: true, bookings: await Booking.find(f).populate('user', 'name telegram discordTag').sort('date time') }); } catch (e) { res.status(500).json({ success: false, message: e.message }); }
 });
 app.put('/api/bookings/:id/confirm', protect, adminOnly, async (req, res) => {
-  try { const b = await Booking.findByIdAndUpdate(req.params.id, { status: 'confirmed' }, { new: true }); res.json({ success: true, booking: b }); } catch (e) { res.status(500).json({ success: false, message: e.message }); }
+  try {
+    const b = await Booking.findByIdAndUpdate(req.params.id, { status: 'confirmed' }, { new: true });
+    if (b && b.user) {
+      await Notification.create({ user: b.user, title: 'Booking Dikonfirmasi', message: `Sesi booking Anda pada ${b.date} jam ${b.time} telah dikonfirmasi.`, type: 'booking', link: '/dashboard/booking' });
+    }
+    res.json({ success: true, booking: b });
+  } catch (e) { res.status(500).json({ success: false, message: e.message }); }
 });
 app.put('/api/bookings/:id/cancel', protect, adminOnly, async (req, res) => {
-  try { const b = await Booking.findByIdAndUpdate(req.params.id, { status: 'cancelled' }, { new: true }); res.json({ success: true, booking: b }); } catch (e) { res.status(500).json({ success: false, message: e.message }); }
+  try {
+    const b = await Booking.findByIdAndUpdate(req.params.id, { status: 'cancelled' }, { new: true });
+    if (b && b.user) {
+      await Notification.create({ user: b.user, title: 'Booking Dibatalkan', message: `Sesi booking Anda pada ${b.date} jam ${b.time} telah dibatalkan oleh admin.`, type: 'booking', link: '/dashboard/booking' });
+    }
+    res.json({ success: true, booking: b });
+  } catch (e) { res.status(500).json({ success: false, message: e.message }); }
 });
 app.post('/api/bookings/block-date', protect, adminOnly, async (req, res) => {
   try { const b = await BlockedDate.create({ date: req.body.date, note: req.body.note }); res.status(201).json({ success: true, blocked: b }); } catch (e) { res.status(500).json({ success: false, message: e.message }); }
@@ -398,6 +422,10 @@ app.post('/api/tickets', protect, async (req, res) => {
   try {
     const { subject, message } = req.body;
     const ticket = await Ticket.create({ user: req.user._id, subject, messages: [{ sender: 'user', text: message, time: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) }] });
+    const admins = await User.find({ role: 'admin' });
+    for (const admin of admins) {
+      await Notification.create({ user: admin._id, title: 'Tiket Baru', message: `${req.user.name} membuat tiket baru: "${subject}".`, type: 'system', link: '/admin/tickets' });
+    }
     res.status(201).json({ success: true, ticket });
   } catch (e) { res.status(500).json({ success: false, message: e.message }); }
 });
@@ -424,6 +452,10 @@ app.post('/api/tickets/:id/message', protect, async (req, res) => {
     if (sender === 'admin') t.admin = req.user.name;
     t.status = sender === 'admin' ? 'open' : 'pending';
     await t.save();
+    const otherParty = sender === 'admin' ? t.user : await User.findOne({ role: 'admin' });
+    if (otherParty) {
+      await Notification.create({ user: otherParty._id || otherParty, title: 'Balasan Tiket', message: `Balasan baru pada tiket "${t.subject}" dari ${sender === 'admin' ? 'Admin' : req.user.name}.`, type: 'system', link: '/dashboard/tickets' });
+    }
     res.json({ success: true, ticket: t });
   } catch (e) { res.status(500).json({ success: false, message: e.message }); }
 });
@@ -443,6 +475,13 @@ app.post('/api/broadcasts', protect, adminOnly, async (req, res) => {
     else if (target === 'batch5') reach = await User.countDocuments({ batchName: /Basic/i, status: 'active' });
     else if (target === 'batch6') reach = await User.countDocuments({ batchName: /Advanced|Pro/i, status: 'active' });
     const b = await Broadcast.create({ title, body, type, target, reach, sentAt: new Date() });
+    let targetUsers = [];
+    if (target === 'all') targetUsers = await User.find({ status: 'active' }).select('_id');
+    else if (target === 'batch5') targetUsers = await User.find({ batchName: /Basic/i, status: 'active' }).select('_id');
+    else if (target === 'batch6') targetUsers = await User.find({ batchName: /Advanced|Pro/i, status: 'active' }).select('_id');
+    for (const u of targetUsers) {
+      await Notification.create({ user: u._id, title: `Broadcast: ${title}`, message: body, type: 'broadcast', link: '/dashboard' });
+    }
     res.status(201).json({ success: true, broadcast: b });
   } catch (e) { res.status(500).json({ success: false, message: e.message }); }
 });
@@ -639,7 +678,31 @@ app.get('/api/admin/cleanup', protect, adminOnly, async (req, res) => {
     await Broadcast.deleteMany({});
     await Journal.deleteMany({});
     await Account.deleteMany({});
+    await Notification.deleteMany({});
     res.json({ success: true, message: 'All data cleared except admin' });
+  } catch (e) { res.status(500).json({ success: false, message: e.message }); }
+});
+
+// --- NOTIFICATIONS ---
+app.get('/api/notifications', protect, async (req, res) => {
+  try {
+    const notifs = await Notification.find({ user: req.user._id }).sort('-createdAt').limit(50);
+    const unread = await Notification.countDocuments({ user: req.user._id, read: false });
+    res.json({ success: true, notifications: notifs, unread });
+  } catch (e) { res.status(500).json({ success: false, message: e.message }); }
+});
+
+app.put('/api/notifications/read', protect, async (req, res) => {
+  try {
+    await Notification.updateMany({ user: req.user._id, read: false }, { read: true });
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ success: false, message: e.message }); }
+});
+
+app.put('/api/notifications/:id/read', protect, async (req, res) => {
+  try {
+    await Notification.findByIdAndUpdate(req.params.id, { read: true });
+    res.json({ success: true });
   } catch (e) { res.status(500).json({ success: false, message: e.message }); }
 });
 
