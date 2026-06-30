@@ -184,7 +184,7 @@ const AdminCourses = () => {
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState(null);
   const [showForm, setShowForm] = useState(false);
-  const [newModule, setNewModule] = useState({ title: '', batch: 'Semua Batch', status: 'draft', free: false });
+  const [newModule, setNewModule] = useState({ title: '', batch: 'Semua Batch', status: 'published', free: false });
 
   useEffect(() => {
     const fetchModules = async () => {
@@ -238,6 +238,23 @@ const AdminCourses = () => {
     setModules(updated);
   };
 
+  const toggleModuleStatus = async (modIdx) => {
+    const mod = modules[modIdx];
+    const newStatus = mod.status === 'published' ? 'draft' : 'published';
+    try {
+      await fetch(`${API_URL}/modules/${mod._id || mod.id}`, {
+        method: 'PUT',
+        headers: getHeaders(),
+        body: JSON.stringify({ status: newStatus }),
+      }).then(r => r.json());
+      const updated = [...modules];
+      updated[modIdx] = { ...updated[modIdx], status: newStatus };
+      setModules(updated);
+    } catch (err) {
+      console.error('Failed to toggle status:', err);
+    }
+  };
+
   const addModule = async () => {
     if (!newModule.title) return;
     try {
@@ -260,7 +277,7 @@ const AdminCourses = () => {
     } catch (err) {
       console.error('Failed to create module:', err);
     }
-    setNewModule({ title: '', batch: 'Semua Batch', status: 'draft', free: false });
+        setNewModule({ title: '', batch: 'Semua Batch', status: 'published', free: false });
     setShowForm(false);
   };
 
@@ -374,7 +391,8 @@ const AdminCourses = () => {
                   <div className="flex items-center gap-2 flex-wrap mb-1">
                     <h3 className="font-bold">{mod.title}</h3>
                     {mod.free && <span className="text-[10px] bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full font-bold border border-green-500/20">GRATIS</span>}
-                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold border ${mod.status === 'published' ? 'bg-blue-500/20 text-blue-400 border-blue-500/20' : 'bg-gray-500/20 text-gray-400 border-gray-500/20'}`}>
+                    <span onClick={(e) => { e.stopPropagation(); toggleModuleStatus(modIdx); }}
+                      className={`text-[10px] px-2 py-0.5 rounded-full font-bold border cursor-pointer transition-colors ${mod.status === 'published' ? 'bg-blue-500/20 text-blue-400 border-blue-500/20 hover:bg-blue-500/30' : 'bg-gray-500/20 text-gray-400 border-gray-500/20 hover:bg-gray-500/30'}`}>
                       {mod.status === 'published' ? 'Published' : 'Draft'}
                     </span>
                   </div>
