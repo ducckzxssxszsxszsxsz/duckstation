@@ -8,6 +8,7 @@ import BatchSelection from './BatchSelection';
 import HowToStart from './HowToStart';
 import JournalPage from './JournalPage';
 import MessagesPage from './MessagesPage';
+import ModuleDetail from './ModuleDetail';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 
@@ -127,8 +128,8 @@ const DashboardHome = () => {
                   <p className={`text-xs sm:text-sm ${mod.free ? 'text-gray-400' : 'text-gray-500'}`}>{mod.lessons?.length || 0} lessons • Batch: {mod.batch || 'Semua'}</p>
                 </div>
               </div>
-              {mod.free ? (
-                <button className="flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-white font-semibold transition-colors border border-white/10 w-full sm:w-auto text-sm">
+              {mod.free || !isGuest ? (
+                <button onClick={() => navigate(`/dashboard/module/${mod._id}`)} className="flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-white font-semibold transition-colors border border-white/10 w-full sm:w-auto text-sm">
                   Mulai Belajar <ChevronRight size={16} />
                 </button>
               ) : (
@@ -397,6 +398,7 @@ const Dashboard = () => {
           <Route path="/booking" element={isGuest ? <Navigate to="/dashboard/batches" replace /> : <BookingPage />} />
           <Route path="/homework" element={isGuest ? <Navigate to="/dashboard/batches" replace /> : <HomeworkPage />} />
           <Route path="/journal" element={isGuest ? <Navigate to="/dashboard/batches" replace /> : <JournalPage />} />
+          <Route path="/module/:id" element={<ModuleDetail />} />
           <Route path="/tickets" element={<TicketingPage />} />
           <Route path="/messages" element={<MessagesPage />} />
           <Route path="/settings" element={<UserSettings />} />
