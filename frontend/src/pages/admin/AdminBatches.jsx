@@ -8,6 +8,7 @@ const AdminBatches = () => {
   const [batches, setBatches] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState({
     name: '', tier: 'Starter', description: '', priceIdr: '', priceUsdt: '', discordRole: '', roleName: '', status: 'open', durationDays: 30,
   });
@@ -46,6 +47,56 @@ const AdminBatches = () => {
     }
   };
 
+  const handleEdit = (batch) => {
+    setEditingId(batch._id);
+    setForm({
+      name: batch.name || '',
+      tier: batch.tier || 'Starter',
+      description: batch.description || '',
+      priceIdr: batch.priceIdr || '',
+      priceUsdt: batch.priceUsdt || '',
+      discordRole: batch.discordRole || '',
+      roleName: batch.role || '',
+      status: batch.status || 'open',
+      durationDays: batch.durationDays || 30,
+    });
+    setShowForm(true);
+  };
+
+  const handleUpdate = async () => {
+    if (!form.name || !editingId) return;
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`${API_URL}/batches/${editingId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify(form),
+      }).then(r => r.json());
+      if (res.success) {
+        fetchBatches();
+        setShowForm(false);
+        setEditingId(null);
+        setForm({ name: '', tier: 'Starter', description: '', priceIdr: '', priceUsdt: '', discordRole: '', roleName: '', status: 'open', durationDays: 30 });
+      }
+    } catch (err) {
+      console.error('Failed to update batch:', err);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!confirm('Yakin hapus batch ini?')) return;
+    try {
+      const token = localStorage.getItem('token');
+      await fetch(`${API_URL}/batches/${id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      fetchBatches();
+    } catch (err) {
+      console.error('Failed to delete batch:', err);
+    }
+  };
+
   return (
     <div className="p-6 md:p-8 max-w-5xl mx-auto">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
@@ -62,7 +113,7 @@ const AdminBatches = () => {
       {/* Form */}
       {showForm && (
         <div className="bg-brand-secondary border border-brand-primary/30 rounded-2xl p-6 mb-6">
-          <h3 className="font-bold text-lg mb-4">Buat Batch Baru</h3>
+          <h3 className="font-bold text-lg mb-4">{editingId ? 'Edit Batch' : 'Buat Batch Baru'}</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div>
               <label className="text-xs text-gray-400 mb-1 block">Nama Batch</label>
@@ -119,8 +170,8 @@ const AdminBatches = () => {
             </div>
           </div>
           <div className="flex gap-3">
-            <button onClick={handleCreate} className="px-5 py-2 bg-brand-primary text-brand-dark font-bold rounded-xl text-sm hover:bg-yellow-400 transition-colors">Simpan Batch</button>
-            <button onClick={() => setShowForm(false)} className="px-5 py-2 bg-white/5 text-gray-400 font-medium rounded-xl text-sm hover:bg-white/10 transition-colors">Batal</button>
+            <button onClick={editingId ? handleUpdate : handleCreate} className="px-5 py-2 bg-brand-primary text-brand-dark font-bold rounded-xl text-sm hover:bg-yellow-400 transition-colors">{editingId ? 'Update Batch' : 'Simpan Batch'}</button>
+            <button onClick={() => { setShowForm(false); setEditingId(null); setForm({ name: '', tier: 'Starter', description: '', priceIdr: '', priceUsdt: '', discordRole: '', roleName: '', status: 'open', durationDays: 30 }); }} className="px-5 py-2 bg-white/5 text-gray-400 font-medium rounded-xl text-sm hover:bg-white/10 transition-colors">Batal</button>
           </div>
         </div>
       )}
@@ -158,10 +209,10 @@ const AdminBatches = () => {
                 </div>
               </div>
               <div className="flex gap-2 shrink-0">
-                <button className="flex items-center gap-1 px-4 py-2 bg-white/5 text-gray-300 hover:text-white rounded-xl text-sm font-medium border border-white/10 hover:bg-white/10 transition-colors">
+                <button onClick={() => handleEdit(batch)} className="flex items-center gap-1 px-4 py-2 bg-white/5 text-gray-300 hover:text-white rounded-xl text-sm font-medium border border-white/10 hover:bg-white/10 transition-colors">
                   <Edit size={14} /> Edit
                 </button>
-                <button className="flex items-center gap-1 px-4 py-2 bg-red-500/10 text-red-400 hover:bg-red-500/20 rounded-xl text-sm font-medium border border-red-500/20 transition-colors">
+                <button onClick={() => handleDelete(batch._id)} className="flex items-center gap-1 px-4 py-2 bg-red-500/10 text-red-400 hover:bg-red-500/20 rounded-xl text-sm font-medium border border-red-500/20 transition-colors">
                   <Trash2 size={14} /> Hapus
                 </button>
               </div>
