@@ -64,8 +64,8 @@ const BatchSelection = () => {
                     <h3 className="text-2xl font-bold">{batch.name}</h3>
                   </div>
                   <div className="text-right">
-                    <p className={`text-3xl font-black ${batch.tier === 'Pro' ? 'text-brand-primary' : 'text-white'}`}>{batch.priceUsdt}</p>
-                    <p className="text-sm text-gray-500">{batch.priceIdr}</p>
+                    <p className={`text-3xl font-black ${batch.tier === 'Pro' ? 'text-brand-primary' : 'text-white'}`}>${batch.priceUsdt || '0'}</p>
+                    <p className="text-sm text-gray-500">Rp {batch.priceIdr || '0'}</p>
                   </div>
                 </div>
               </div>

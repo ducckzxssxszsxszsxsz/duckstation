@@ -146,7 +146,7 @@ const AdminBatches = () => {
                     </span>
                   </div>
                   <div className="flex items-center gap-3 text-sm text-gray-400 flex-wrap">
-                    <span>{batch.priceIdr || '-'} / {batch.priceUsdt || '-'}</span>
+                    <span>{batch.priceIdr ? `Rp ${batch.priceIdr}` : '-'} / {batch.priceUsdt ? `$${batch.priceUsdt}` : '-'}</span>
                     <span>•</span>
                     {batch.roleName && <span>Role: <span className="text-green-400 font-medium">{batch.roleName}</span></span>}
                     {batch.roleName && <span>•</span>}

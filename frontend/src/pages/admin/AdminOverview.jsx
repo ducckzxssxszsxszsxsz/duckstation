@@ -23,7 +23,7 @@ const AdminOverview = () => {
     const fetchAll = async () => {
       try {
         const [ordersRes, usersRes, ticketsRes] = await Promise.all([
-          api.getAdminOrders('pending'),
+          api.getAdminOrders(''),
           api.getAllUsers(),
           api.getAdminTickets(),
         ]);
@@ -40,8 +40,14 @@ const AdminOverview = () => {
   }, []);
 
   const pendingOrders = orders;
+  const approvedOrders = orders.filter(o => o.status === 'approved');
   const openTickets = tickets.filter(t => t.status === 'open');
   const recentOrders = pendingOrders.slice(0, 5);
+
+  const totalRevenue = approvedOrders.reduce((sum, o) => {
+    const amount = parseFloat((o.amount || '0').replace(/[^0-9]/g, '')) || 0;
+    return sum + amount;
+  }, 0);
 
   const activityLog = [
     ...recentOrders.slice(0, 3).map(o => ({
@@ -67,7 +73,7 @@ const AdminOverview = () => {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-10">
         <StatCard icon={ShoppingBag} label="Order Baru" value={pendingOrders.length} sub="Menunggu approval" color="bg-yellow-500/10 text-yellow-400" />
         <StatCard icon={Users} label="Total Member" value={users.length} sub="Total terdaftar" color="bg-blue-500/10 text-blue-400" />
-        <StatCard icon={DollarSign} label="Revenue Bulan Ini" value="$0" sub="Belum ada data" color="bg-green-500/10 text-green-400" />
+        <StatCard icon={DollarSign} label="Revenue Bulan Ini" value={totalRevenue > 0 ? `Rp ${totalRevenue.toLocaleString('id-ID')}` : 'Rp 0'} sub={`${approvedOrders.length} order disetujui`} color="bg-green-500/10 text-green-400" />
         <StatCard icon={MessageSquare} label="Tiket Open" value={openTickets.length} sub="Butuh balasan admin" color="bg-red-500/10 text-red-400" />
       </div>
 
