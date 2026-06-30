@@ -42,6 +42,7 @@ const { Quiz, QuizAttempt } = require('./models/Quiz');
 const { Booking, BlockedDate, AvailableSlot } = require('./models/Booking');
 const Ticket = require('./models/Ticket');
 const Broadcast = require('./models/Broadcast');
+const { Journal, Account } = require('./models/Journal');
 
 const generateToken = (id) => jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRE || '7d' });
 
@@ -507,6 +508,126 @@ app.put('/api/bookings/:id/reschedule', protect, adminOnly, async (req, res) => 
   } catch (e) { res.status(500).json({ success: false, message: e.message }); }
 });
 
+// --- ACCOUNTS ---
+app.get('/api/accounts', protect, async (req, res) => {
+  try {
+    const accounts = await Account.find({ user: req.user._id }).sort('-createdAt');
+    res.json({ success: true, accounts });
+  } catch (e) { res.status(500).json({ success: false, message: e.message }); }
+});
+
+app.post('/api/accounts', protect, async (req, res) => {
+  try {
+    const { name, type, balance, broker } = req.body;
+    const account = await Account.create({
+      user: req.user._id, name, type: type || 'personal',
+      balance: balance || 5000, currentBalance: balance || 5000, broker: broker || ''
+    });
+    res.status(201).json({ success: true, account });
+  } catch (e) { res.status(500).json({ success: false, message: e.message }); }
+});
+
+app.put('/api/accounts/:id', protect, async (req, res) => {
+  try {
+    const account = await Account.findOne({ _id: req.params.id, user: req.user._id });
+    if (!account) return res.status(404).json({ success: false, message: 'Not found' });
+    Object.assign(account, req.body);
+    await account.save();
+    res.json({ success: true, account });
+  } catch (e) { res.status(500).json({ success: false, message: e.message }); }
+});
+
+app.delete('/api/accounts/:id', protect, async (req, res) => {
+  try {
+    await Account.findOneAndDelete({ _id: req.params.id, user: req.user._id });
+    await Journal.deleteMany({ accountId: req.params.id });
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ success: false, message: e.message }); }
+});
+
+// --- JOURNAL ENTRIES ---
+app.get('/api/journal', protect, async (req, res) => {
+  try {
+    const { accountId, month, year } = req.query;
+    const filter = { user: req.user._id };
+    if (accountId) filter.accountId = accountId;
+    if (month && year) {
+      const start = new Date(year, month - 1, 1);
+      const end = new Date(year, month, 0, 23, 59, 59);
+      filter.date = { $gte: start, $lte: end };
+    }
+    const entries = await Journal.find(filter).sort('-date');
+    res.json({ success: true, entries });
+  } catch (e) { res.status(500).json({ success: false, message: e.message }); }
+});
+
+app.post('/api/journal', protect, async (req, res) => {
+  try {
+    const { accountId, date, pair, timeframe, direction, entryPrice, exitPrice, risk, pnl, reason, notes, images, result } = req.body;
+    const entry = await Journal.create({
+      user: req.user._id, accountId, date: date || new Date(),
+      pair, timeframe: timeframe || 'H1', direction,
+      entryPrice, exitPrice, risk: risk || 0, pnl: pnl || 0,
+      reason, notes, images: images || [], result: result || 'pending'
+    });
+    const account = await Account.findById(accountId);
+    if (account) {
+      account.currentBalance = account.currentBalance + (pnl || 0);
+      await account.save();
+    }
+    res.status(201).json({ success: true, entry });
+  } catch (e) { res.status(500).json({ success: false, message: e.message }); }
+});
+
+app.put('/api/journal/:id', protect, async (req, res) => {
+  try {
+    const old = await Journal.findOne({ _id: req.params.id, user: req.user._id });
+    if (!old) return res.status(404).json({ success: false, message: 'Not found' });
+    const pnlDiff = (req.body.pnl || 0) - (old.pnl || 0);
+    Object.assign(old, req.body);
+    await old.save();
+    if (pnlDiff !== 0) {
+      const account = await Account.findById(old.accountId);
+      if (account) { account.currentBalance += pnlDiff; await account.save(); }
+    }
+    res.json({ success: true, entry: old });
+  } catch (e) { res.status(500).json({ success: false, message: e.message }); }
+});
+
+app.delete('/api/journal/:id', protect, async (req, res) => {
+  try {
+    const entry = await Journal.findOne({ _id: req.params.id, user: req.user._id });
+    if (!entry) return res.status(404).json({ success: false, message: 'Not found' });
+    const account = await Account.findById(entry.accountId);
+    if (account) { account.currentBalance -= (entry.pnl || 0); await account.save(); }
+    await Journal.findByIdAndDelete(req.params.id);
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ success: false, message: e.message }); }
+});
+
+// --- JOURNAL STATS ---
+app.get('/api/journal/stats', protect, async (req, res) => {
+  try {
+    const { accountId } = req.query;
+    const filter = { user: req.user._id };
+    if (accountId) filter.accountId = accountId;
+    const entries = await Journal.find(filter).sort('date');
+    const totalPnl = entries.reduce((s, e) => s + (e.pnl || 0), 0);
+    const wins = entries.filter(e => e.result === 'win').length;
+    const losses = entries.filter(e => e.result === 'loss').length;
+    const totalTrades = entries.length;
+    const winRate = totalTrades > 0 ? Math.round((wins / totalTrades) * 100) : 0;
+    const account = accountId ? await Account.findById(accountId) : null;
+    const startBalance = account ? account.balance : 5000;
+    let running = startBalance;
+    const equityCurve = entries.sort((a,b) => new Date(a.date) - new Date(b.date)).map(e => {
+      running += (e.pnl || 0);
+      return { date: e.date, equity: running, pnl: e.pnl || 0 };
+    });
+    res.json({ success: true, stats: { totalPnl, wins, losses, totalTrades, winRate, equityCurve, startBalance } });
+  } catch (e) { res.status(500).json({ success: false, message: e.message }); }
+});
+
 // --- ADMIN CLEANUP (reset all data except admin) ---
 app.get('/api/admin/cleanup', protect, adminOnly, async (req, res) => {
   try {
@@ -516,6 +637,8 @@ app.get('/api/admin/cleanup', protect, adminOnly, async (req, res) => {
     await Booking.deleteMany({});
     await BlockedDate.deleteMany({});
     await Broadcast.deleteMany({});
+    await Journal.deleteMany({});
+    await Account.deleteMany({});
     res.json({ success: true, message: 'All data cleared except admin' });
   } catch (e) { res.status(500).json({ success: false, message: e.message }); }
 });

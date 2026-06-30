@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, Link, useLocation, useNavigate, Navigate } from 'react-router-dom';
-import { BookOpen, Calendar, CheckSquare, MessageSquare, Shield, DollarSign, Crown, Play, Lock, ChevronRight, User, Settings, LogOut, Bell, AlertTriangle, RotateCcw, CheckCircle, Clock, ArrowRight, Menu, X } from 'lucide-react';
+import { BookOpen, Calendar, CheckSquare, MessageSquare, Shield, DollarSign, Crown, Play, Lock, ChevronRight, User, Settings, LogOut, Bell, AlertTriangle, RotateCcw, CheckCircle, Clock, ArrowRight, Menu, X, BarChart3 } from 'lucide-react';
 import BookingPage from './BookingPage';
 import HomeworkPage from './HomeworkPage';
 import TicketingPage from './TicketingPage';
 import BatchSelection from './BatchSelection';
 import HowToStart from './HowToStart';
+import JournalPage from './JournalPage';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 
@@ -330,6 +331,7 @@ const Dashboard = () => {
           <div className="text-xs font-bold text-gray-500 uppercase tracking-wider mt-6 mb-3 px-4 hidden md:block">Interaksi</div>
           <SidebarLink to="/dashboard/booking" icon={Calendar} label="Booking 1-on-1" active={currentPath === '/dashboard/booking'} onClick={closeSidebar} disabled={isGuest} />
           <SidebarLink to="/dashboard/homework" icon={CheckSquare} label="Homework & Quiz" active={currentPath === '/dashboard/homework'} onClick={closeSidebar} disabled={isGuest} />
+          <SidebarLink to="/dashboard/journal" icon={BarChart3} label="Trading Journal" active={currentPath === '/dashboard/journal'} onClick={closeSidebar} disabled={isGuest} />
           <SidebarLink to="/dashboard/tickets" icon={MessageSquare} label="Private Ticketing" active={currentPath === '/dashboard/tickets'} onClick={closeSidebar} />
           
           <div className="text-xs font-bold text-gray-500 uppercase tracking-wider mt-6 mb-3 px-4 hidden md:block">Akun Saya</div>
@@ -380,6 +382,7 @@ const Dashboard = () => {
           <Route path="/batches" element={<BatchSelection />} />
           <Route path="/booking" element={isGuest ? <Navigate to="/dashboard/batches" replace /> : <BookingPage />} />
           <Route path="/homework" element={isGuest ? <Navigate to="/dashboard/batches" replace /> : <HomeworkPage />} />
+          <Route path="/journal" element={isGuest ? <Navigate to="/dashboard/batches" replace /> : <JournalPage />} />
           <Route path="/tickets" element={<TicketingPage />} />
           <Route path="/settings" element={<UserSettings />} />
           <Route path="*" element={<div className="p-8 text-gray-400 flex items-center justify-center h-full">Modul ini sedang dalam tahap pengembangan (WIP).</div>} />

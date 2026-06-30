@@ -137,6 +137,30 @@ const api = {
 
   extendUserRole: (userId, days) =>
     fetch(`${API_URL}/users/${userId}/extend`, { method: 'PUT', headers: headers(), body: JSON.stringify({ days }) }).then(r => r.json()),
+
+  // Accounts
+  getAccounts: () =>
+    fetch(`${API_URL}/accounts`, { headers: headers() }).then(r => r.json()),
+  createAccount: (data) =>
+    fetch(`${API_URL}/accounts`, { method: 'POST', headers: headers(), body: JSON.stringify(data) }).then(r => r.json()),
+  updateAccount: (id, data) =>
+    fetch(`${API_URL}/accounts/${id}`, { method: 'PUT', headers: headers(), body: JSON.stringify(data) }).then(r => r.json()),
+  deleteAccount: (id) =>
+    fetch(`${API_URL}/accounts/${id}`, { method: 'DELETE', headers: headers() }).then(r => r.json()),
+
+  // Journal
+  getJournal: (params) => {
+    const q = new URLSearchParams(params || {}).toString();
+    return fetch(`${API_URL}/journal?${q}`, { headers: headers() }).then(r => r.json());
+  },
+  createJournalEntry: (data) =>
+    fetch(`${API_URL}/journal`, { method: 'POST', headers: headers(), body: JSON.stringify(data) }).then(r => r.json()),
+  updateJournalEntry: (id, data) =>
+    fetch(`${API_URL}/journal/${id}`, { method: 'PUT', headers: headers(), body: JSON.stringify(data) }).then(r => r.json()),
+  deleteJournalEntry: (id) =>
+    fetch(`${API_URL}/journal/${id}`, { method: 'DELETE', headers: headers() }).then(r => r.json()),
+  getJournalStats: (accountId) =>
+    fetch(`${API_URL}/journal/stats${accountId ? `?accountId=${accountId}` : ''}`, { headers: headers() }).then(r => r.json()),
 };
 
 export default api;
