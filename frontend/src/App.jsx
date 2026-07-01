@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
+import { LanguageProvider } from './context/LanguageContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import WelcomePage from './pages/WelcomePage';
 import LandingPage from './pages/LandingPage';
@@ -25,6 +26,7 @@ const AdminLayout = ({ children }) => (
 function App() {
   return (
     <Router>
+      <LanguageProvider>
       <AuthProvider>
         <Routes>
           {/* Public */}
@@ -55,6 +57,7 @@ function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AuthProvider>
+      </LanguageProvider>
     </Router>
   );
 }

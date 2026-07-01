@@ -4,6 +4,7 @@ import { MessageSquare, Shield, Zap, Mail, Lock, ArrowRight } from 'lucide-react
 import duckMascot from '../assets/duck-mascot-nobg.png';
 import GoogleLoginButton from '../components/GoogleLoginButton';
 import { useAuth } from '../context/AuthContext';
+import { useLang } from '../context/LanguageContext';
 import api from '../services/api';
 
 const API_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
@@ -11,6 +12,7 @@ const API_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://loc
 const WelcomePage = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
+  const { t } = useLang();
   const [showLoginForm, setShowLoginForm] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -112,7 +114,7 @@ const WelcomePage = () => {
           </h1>
 
           <p className="text-base md:text-lg text-gray-400 mb-10 max-w-lg leading-relaxed font-light">
-            Platform komunitas trading modern. Akses materi eksklusif, komunitas Discord privat, dan real-time market data — semua dalam satu platform.
+            {t('welcome.subtitle')}
           </p>
 
           {/* Login Buttons */}
@@ -129,13 +131,13 @@ const WelcomePage = () => {
                 className="flex items-center justify-center gap-3 px-6 py-4 rounded-2xl bg-[#5865F2] hover:bg-[#4752C4] text-white transition-all shadow-[0_0_20px_rgba(88,101,242,0.3)] hover:shadow-[0_0_30px_rgba(88,101,242,0.5)] transform hover:-translate-y-1 font-bold text-base"
               >
                 <MessageSquare size={20} />
-                Login with Discord
+                {t('welcome.discord')}
               </button>
 
               {/* Divider */}
               <div className="flex items-center gap-3 text-gray-500 text-xs">
                 <div className="flex-1 h-px bg-white/10"></div>
-                <span>ATAU</span>
+                <span>{t('welcome.or')}</span>
                 <div className="flex-1 h-px bg-white/10"></div>
               </div>
 
@@ -145,16 +147,16 @@ const WelcomePage = () => {
                 className="flex items-center justify-center gap-3 px-6 py-4 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-white transition-all font-semibold text-sm"
               >
                 <Mail size={18} />
-                Login dengan Email
+                {t('welcome.email')}
               </button>
             </div>
           ) : (
             <form onSubmit={handleEmailLogin} className="w-full max-w-md mb-10">
               <div className="bg-brand-secondary border border-white/10 rounded-2xl p-6 space-y-4">
                 <div className="flex items-center justify-between mb-2">
-                  <h3 className="font-bold text-lg">Login Email</h3>
+                  <h3 className="font-bold text-lg">{t('welcome.email_login')}</h3>
                   <button type="button" onClick={() => { setShowLoginForm(false); setError(''); }} className="text-xs text-gray-400 hover:text-white transition-colors">
-                    Kembali
+                    {t('welcome.back')}
                   </button>
                 </div>
 
@@ -165,7 +167,7 @@ const WelcomePage = () => {
                 )}
 
                 <div>
-                  <label className="block text-sm text-gray-400 mb-1.5">Email</label>
+                  <label className="block text-sm text-gray-400 mb-1.5">{t('settings.email')}</label>
                   <div className="relative">
                     <Mail size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" />
                     <input
@@ -180,7 +182,7 @@ const WelcomePage = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm text-gray-400 mb-1.5">Password</label>
+                  <label className="block text-sm text-gray-400 mb-1.5">{t('welcome.password')}</label>
                   <div className="relative">
                     <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" />
                     <input
@@ -203,13 +205,13 @@ const WelcomePage = () => {
                     <div className="w-5 h-5 border-2 border-brand-dark border-t-transparent rounded-full animate-spin"></div>
                   ) : (
                     <>
-                      Masuk <ArrowRight size={16} />
+                      {t('welcome.login_btn')} <ArrowRight size={16} />
                     </>
                   )}
                 </button>
 
                 <p className="text-[11px] text-gray-500 text-center">
-                  Belum punya akun? Hubungi admin via Discord.
+                  {t('welcome.no_account')}
                 </p>
               </div>
             </form>
@@ -219,17 +221,17 @@ const WelcomePage = () => {
           <div className="flex items-center justify-center lg:justify-start gap-6 text-xs text-gray-500 font-medium">
             <div className="flex items-center gap-2">
               <Shield size={14} className="text-green-400" />
-              <span>Secure Auth</span>
+              <span>{t('welcome.secure')}</span>
             </div>
             <div className="w-px h-3 bg-white/10"></div>
             <div className="flex items-center gap-2">
               <Zap size={14} className="text-brand-accent" />
-              <span>Real-time Data</span>
+              <span>{t('welcome.realtime')}</span>
             </div>
             <div className="w-px h-3 bg-white/10"></div>
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-[#5865F2] flex items-center justify-center"><span className="text-[6px] text-white font-black">D</span></div>
-              <span>Discord Community</span>
+              <span>{t('welcome.community')}</span>
             </div>
           </div>
         </div>

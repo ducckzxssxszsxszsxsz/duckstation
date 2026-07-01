@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar, Clock, CheckCircle, AlertCircle, Lock } from 'lucide-react';
 import api from '../services/api';
+import { useLang } from '../context/LanguageContext';
 
 const BookingPage = () => {
+  const { t } = useLang();
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedTime, setSelectedTime] = useState(null);
   const [slots, setSlots] = useState([]);

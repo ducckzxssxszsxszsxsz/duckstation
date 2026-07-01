@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import { ArrowRight, TrendingUp, Shield, Users, Activity, ChevronRight, ChevronDown, BookOpen, Calendar, MessageSquare, Zap, Award, Clock, CheckCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useLang } from '../context/LanguageContext';
 
 // ─── D3 NETWORK GRAPH ───
 const MarketNetworkGraph = () => {
@@ -139,6 +140,7 @@ const FaqItem = ({ item }) => {
 // ─── LANDING PAGE ───
 const LandingPage = () => {
   const navigate = useNavigate();
+  const { t } = useLang();
 
   return (
     <div className="bg-brand-dark overflow-hidden">
@@ -161,11 +163,11 @@ const LandingPage = () => {
             </div>
 
             <h1 className="text-6xl md:text-8xl font-black leading-[1.1] mb-6 tracking-tighter">
-              THE ELITE<br/>TRADING <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-accent to-blue-500">COMMUNITY.</span>
+              {t('landing.hero_title')}<br/>TRADING <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-accent to-blue-500">COMMUNITY.</span>
             </h1>
 
             <p className="text-xl text-gray-300 mb-10 max-w-xl leading-relaxed border-l-4 border-brand-primary pl-4">
-              Bukan sekadar edukasi, ini adalah ekosistem. Bergabunglah dengan ribuan trader pro di Discord eksklusif kami. Diskusikan setup <b>Gold, NASDAQ, & Crypto</b>, akses sinyal real-time, dan berkembang bersama komunitas trading paling aktif.
+              {t('landing.hero_desc')}
             </p>
 
             <div className="flex flex-col sm:flex-row gap-5">
@@ -197,8 +199,8 @@ const LandingPage = () => {
       <section className="py-20 border-t border-white/5">
         <div className="container mx-auto px-4">
           <div className="text-center mb-14">
-            <p className="text-brand-primary text-sm font-bold tracking-widest uppercase mb-3">Fitur Unggulan</p>
-            <h2 className="text-4xl md:text-5xl font-black">Kenapa DuckStation?</h2>
+            <p className="text-brand-primary text-sm font-bold tracking-widest uppercase mb-3">{t('landing.features_badge')}</p>
+            <h2 className="text-4xl md:text-5xl font-black">{t('landing.features_title')}</h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -226,8 +228,8 @@ const LandingPage = () => {
       <section className="py-20 border-t border-white/5 bg-brand-secondary/30">
         <div className="container mx-auto px-4">
           <div className="text-center mb-14">
-            <p className="text-brand-primary text-sm font-bold tracking-widest uppercase mb-3">Langkah Mudah</p>
-            <h2 className="text-4xl md:text-5xl font-black">Cara Bergabung</h2>
+            <p className="text-brand-primary text-sm font-bold tracking-widest uppercase mb-3">{t('landing.how_badge')}</p>
+            <h2 className="text-4xl md:text-5xl font-black">{t('landing.how_it_works')}</h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 relative">
@@ -255,8 +257,8 @@ const LandingPage = () => {
       <section className="py-20 border-t border-white/5">
         <div className="container mx-auto px-4">
           <div className="text-center mb-14">
-            <p className="text-brand-primary text-sm font-bold tracking-widest uppercase mb-3">Testimoni</p>
-            <h2 className="text-4xl md:text-5xl font-black">Apa Kata Mereka</h2>
+            <p className="text-brand-primary text-sm font-bold tracking-widest uppercase mb-3">{t('landing.testimonials_badge')}</p>
+            <h2 className="text-4xl md:text-5xl font-black">{t('landing.testimonials')}</h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -287,8 +289,8 @@ const LandingPage = () => {
       <section className="py-20 border-t border-white/5 bg-brand-secondary/20">
         <div className="container mx-auto px-4 max-w-3xl">
           <div className="text-center mb-14">
-            <p className="text-brand-primary text-sm font-bold tracking-widest uppercase mb-3">Tanya Jawab</p>
-            <h2 className="text-4xl md:text-5xl font-black">Pertanyaan Umum</h2>
+            <p className="text-brand-primary text-sm font-bold tracking-widest uppercase mb-3">{t('landing.faq_badge')}</p>
+            <h2 className="text-4xl md:text-5xl font-black">{t('landing.faq')}</h2>
           </div>
 
           <div className="space-y-3">
@@ -300,8 +302,8 @@ const LandingPage = () => {
       {/* ── CTA ── */}
       <section className="py-20 border-t border-white/5">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-4xl md:text-5xl font-black mb-4">Siap Memulai <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-primary to-brand-accent">Perjalanan</span> Trading Kamu?</h2>
-          <p className="text-gray-400 text-lg mb-8 max-w-lg mx-auto">Bergabung sekarang dan dapatkan akses ke materi eksklusif, komunitas privat, dan bimbingan mentor profesional.</p>
+          <h2 className="text-4xl md:text-5xl font-black mb-4">{t('landing.cta_title')}</h2>
+          <p className="text-gray-400 text-lg mb-8 max-w-lg mx-auto">{t('landing.cta_desc')}</p>
           <button onClick={() => navigate('/dashboard')}
             className="inline-flex items-center gap-3 px-10 py-5 bg-brand-primary text-brand-dark font-black text-lg rounded-xl hover:bg-yellow-400 transition-all hover:-translate-y-1 shadow-[0_10px_40px_rgba(255,215,0,0.3)]">
             MULAI SEKARANG <ArrowRight size={22} />
@@ -317,10 +319,10 @@ const LandingPage = () => {
             <span className="text-xs text-gray-500">© 2026 All rights reserved.</span>
           </div>
           <div className="flex items-center gap-6 text-sm text-gray-500">
-            <a href="#" className="hover:text-white transition-colors">Terms</a>
-            <a href="#" className="hover:text-white transition-colors">Privacy</a>
-            <a href="#" className="hover:text-white transition-colors">Discord</a>
-            <a href="#" className="hover:text-white transition-colors">Twitter</a>
+            <a href="#" className="hover:text-white transition-colors">{t('landing.terms')}</a>
+            <a href="#" className="hover:text-white transition-colors">{t('landing.privacy')}</a>
+            <a href="#" className="hover:text-white transition-colors">{t('landing.discord_link')}</a>
+            <a href="#" className="hover:text-white transition-colors">{t('landing.twitter')}</a>
           </div>
         </div>
       </footer>
