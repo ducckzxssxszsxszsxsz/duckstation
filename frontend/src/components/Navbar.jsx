@@ -3,12 +3,15 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { MessageSquare, Shield, LogOut, Bell } from 'lucide-react';
 import duckMascot from '../assets/duck-mascot-nobg.png';
 import { useAuth } from '../context/AuthContext';
+import { useLang } from '../context/LanguageContext';
+import LanguageSelector from './LanguageSelector';
 import api from '../services/api';
 
 const Navbar = ({ isAdmin = false }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, isLoggedIn, logout } = useAuth();
+  const { lang, setLang } = useLang();
   const [notifs, setNotifs] = useState([]);
   const [unread, setUnread] = useState(0);
   const [showNotifs, setShowNotifs] = useState(false);
@@ -64,8 +67,9 @@ const Navbar = ({ isAdmin = false }) => {
         </Link>
         
         <div className="flex items-center gap-3">
-          {isLoggedIn ? (
-            <div className="flex items-center gap-3">
+           {isLoggedIn ? (
+             <div className="flex items-center gap-3">
+               <LanguageSelector />
               {isAdmin ? (
                 <>
                   <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-500/20">
